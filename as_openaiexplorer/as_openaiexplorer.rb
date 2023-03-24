@@ -25,7 +25,7 @@ module AS_Extensions
     
         default = Sketchup.read_default( @extname , "openai_warning" )
         if default.to_s != "1" then
-            prompt = "By clicking OK you acknowledge that this is an experimental extension that is able to automate SketchUp. Use at your own risk."        
+            prompt = "By clicking OK you acknowledge that this is an experimental extension and that it is able to automate SketchUp. Use at your own risk!"        
             res = UI.messagebox( prompt, MB_OK ) 
             Sketchup.write_default( @extname , "openai_warning" , res )
         end 
@@ -86,7 +86,7 @@ module AS_Extensions
             main_prompt = UI.inputbox( prompts , defaults , toolname )
             return if !main_prompt
 
-            Sketchup.write_default( @extname , "openai_explorer" , main_prompt.map { |s| s.gsub( '"' , ' inch' ) } )  # Fix for inch pref saving error      
+            Sketchup.write_default( @extname , "openai_explorer" , main_prompt.map { |s| s.gsub( '"' , '' ) } )  # Fix for inch pref saving error      
 
             begin
 
@@ -152,6 +152,11 @@ module AS_Extensions
                     eval generated_code    
 
                 end
+                
+                # Display some statistics in the Ruby console
+                puts "\nRequest Stats ============\n"
+                puts "Tokens used: " + response_body["usage"]["total_tokens"].to_s     
+                puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s
 
                 # Life is always better with some feedback while SketchUp works
                 Sketchup.status_text = toolname + " | Done"     
@@ -161,7 +166,7 @@ module AS_Extensions
 
              rescue Exception => e    
 
-                UI.messagebox("Couldn't do it! Error: #{e}")
+                UI.messagebox( "Couldn't do it! Error: #{e}\n\nOpenAI Response:\n" + response_body["error"]["message"].to_s  )
 
             end     
             
@@ -223,9 +228,9 @@ module AS_Extensions
       # Add to the SketchUp Extensions menu
       menu = UI.menu("Plugins").add_submenu( @exttitle )
       menu.add_item("OpenAI Explorer") { self.openai_explorer }
-      menu.add_separator
       menu.add_item("OpenAI Settings") { self.openai_explorer_settings }
       menu.add_item("Get OpenAI API Key") { self.show_openai_api }
+      menu.add_separator      
       menu.add_item( "Help" ) { self.show_help }
 
       # Let Ruby know we have loaded this file

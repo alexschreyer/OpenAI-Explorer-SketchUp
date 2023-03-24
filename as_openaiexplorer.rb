@@ -15,19 +15,17 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          OpenAIExplorer (Experimental)
 
-Version:        1.0
+Version:        1.0.1
 
-Date :          3/18/2023
+Date :          3/24/2023
 
-Description :   An experimental tool to query the OpenAI API using natural language
-                and then execute the resulting code in SketchUp (to create 
-                or manipulate geometry).
+Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
 
 History:        1.0 (3/18/2023):
                 - first version
-                1.0.1 ():
-                - Added some cleanup for the returned text
-                - Added error handling for API and a warning
+                1.0.1 (3/24/2023):
+                - Added cleanup for the returned code/text
+                - Added error handling for API and a one-time warning for the extension
                 
 
 =end
@@ -47,7 +45,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "1.0"
+    @extversion           = "1.0.1"
     @exttitle             = "OpenAI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
