@@ -26,6 +26,8 @@ History:        1.0 (3/18/2023):
                 1.0.1 (3/24/2023):
                 - Added cleanup for the returned code/text
                 - Added error handling for API and a one-time warning for the extension
+                1.0.2 (TBD):
+                - Fixed error handling bug
                 
 
 =end

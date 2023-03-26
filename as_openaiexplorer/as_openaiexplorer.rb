@@ -25,8 +25,9 @@ module AS_Extensions
     
         default = Sketchup.read_default( @extname , "openai_warning" )
         if default.to_s != "1" then
-            prompt = "By clicking OK you acknowledge that this is an experimental extension and that it is able to automate SketchUp. Use at your own risk!"        
-            res = UI.messagebox( prompt, MB_OK ) 
+            prompt = "By clicking OK you acknowledge that this is an experimental extension and that it is able to automate SketchUp using its Ruby scripting engine. Use at your own risk!"
+            prompt += "\n\nTHIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
+            res = UI.messagebox( prompt, MB_OK )
             Sketchup.write_default( @extname , "openai_warning" , res )
         end 
 
@@ -71,6 +72,7 @@ module AS_Extensions
         defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "", "Yes" ]
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )     
         
+        # Provide a reminder for the API Key when it doesn't have the correct length
         if settings[4].length < 50 then
         
             UI.messagebox("You must enter an API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.")
@@ -156,7 +158,7 @@ module AS_Extensions
                 # Display some statistics in the Ruby console
                 puts "\nRequest Stats ============\n"
                 puts "Tokens used: " + response_body["usage"]["total_tokens"].to_s     
-                puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s
+                # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s
 
                 # Life is always better with some feedback while SketchUp works
                 Sketchup.status_text = toolname + " | Done"     
@@ -166,7 +168,15 @@ module AS_Extensions
 
              rescue Exception => e    
 
-                UI.messagebox( "Couldn't do it! Error: #{e}\n\nOpenAI Response:\n" + response_body["error"]["message"].to_s  )
+                # Provide an error message for SketchUp errors
+                errmsg = "Couldn't do it!\n\nSketchUp error: #{e}"
+                
+                # And provide one for OpenAI errors if they get returned
+                if ( defined?(response_body['error']['message']) != nil ) then
+                    errmsg += "\n\nOpenAI error: #{response_body['error']['message']}"
+                end
+                
+                UI.messagebox( errmsg )
 
             end     
             
