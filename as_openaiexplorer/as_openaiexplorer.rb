@@ -25,7 +25,7 @@ module AS_Extensions
     
         default = Sketchup.read_default( @extname , "openai_warning" )
         if default.to_s != "1" then
-            prompt = "By clicking OK you acknowledge that this is an experimental extension and that it is able to automate SketchUp using its Ruby scripting engine. Use at your own risk!"
+            prompt = "By clicking OK you acknowledge that #{@exttitle} is an experimental extension, which is able to fully automate SketchUp using its Ruby scripting engine. Use at your own risk!"
             prompt += "\n\nTHIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
             res = UI.messagebox( prompt, MB_OK )
             Sketchup.write_default( @extname , "openai_warning" , res )
@@ -75,7 +75,7 @@ module AS_Extensions
         # Provide a reminder for the API Key when it doesn't have the correct length
         if settings[4].length < 50 then
         
-            UI.messagebox("You must enter an API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.")
+            UI.messagebox("You must enter an OpenAI API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.")
             self.show_openai_api
             self.openai_explorer_settings
         
@@ -143,6 +143,11 @@ module AS_Extensions
                 # Display the generated code in the Ruby console
                 puts "\nResult ============\n"
                 puts generated_code
+                
+                # Display some statistics in the Ruby console
+                puts "\nStats ============\n"
+                puts "Tokens used: " + response_body["usage"]["total_tokens"].to_s     
+                # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s                
 
                 # Execute code only when desired
                 if ( settings[5].to_s == "Yes" )
@@ -153,12 +158,7 @@ module AS_Extensions
                     # Run the generated code - fingers crossed!
                     eval generated_code    
 
-                end
-                
-                # Display some statistics in the Ruby console
-                puts "\nRequest Stats ============\n"
-                puts "Tokens used: " + response_body["usage"]["total_tokens"].to_s     
-                # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s
+                end             
 
                 # Life is always better with some feedback while SketchUp works
                 Sketchup.status_text = toolname + " | Done"     
@@ -176,6 +176,7 @@ module AS_Extensions
                     errmsg += "\n\nOpenAI error: #{response_body['error']['message']}"
                 end
                 
+                puts "This request generated an error\n"                
                 UI.messagebox( errmsg )
 
             end     
