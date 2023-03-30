@@ -33,6 +33,8 @@ History:        1.0 (3/18/2023):
                 - Added license/disclaimer file
                 - Added better license display on first use
                 - Added link to OpenAI TOU to menu
+                - Reverted the prompt prefix to a text box
+                - Disabled code execution as the default
 
 =end
 

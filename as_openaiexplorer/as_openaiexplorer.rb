@@ -63,7 +63,7 @@ module AS_Extensions
         
         # Get all the parameters from input dialog
         prompts = [ "Prompt Prefix: " , "Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
-        defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "Enter your API key here", "Yes" ]
+        defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "Enter your API key here", "No" ]
         lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
