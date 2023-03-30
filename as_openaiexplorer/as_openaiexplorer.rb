@@ -20,18 +20,35 @@ module AS_Extensions
     # ==================
     
     
-    def self.show_warning
-    # Shows a warning once   
+    def self.show_disclaimer
+    # Shows a disclaimer window once
     
-        default = Sketchup.read_default( @extname , "openai_warning" )
-        if default.to_s != "1" then
-            prompt = "By clicking OK you acknowledge that #{@exttitle} is an experimental extension, which is able to fully automate SketchUp using its Ruby scripting engine. Use at your own risk!"
-            prompt += "\n\nTHIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE."
-            res = UI.messagebox( prompt, MB_OK )
-            Sketchup.write_default( @extname , "openai_warning" , res )
+        default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
+        if default.to_s != "yes" then        
+        
+            # Show a window with my terms of use
+            f = File.join( __dir__ , "license.txt" )
+            title = @exttitle + " | Terms of Use"
+            if Sketchup.version.to_f < 17 then   # Use old dialog
+              @dlg = UI::WebDialog.new( title , true ,
+                title.gsub(/\s+/, "_") , 600 , 700 , 100 , 100 , true);
+              @dlg.navigation_buttons_enabled = false
+              @dlg.set_file( f )
+              @dlg.show_modal      
+            else   #Use new dialog
+              @dlg = UI::HtmlDialog.new( { :dialog_title => title, :width => 600, :height => 700,
+                :style => UI::HtmlDialog::STYLE_UTILITY, :preferences_key => title.gsub(/\s+/, "_") } )
+              @dlg.set_file( f )
+              @dlg.show_modal
+              @dlg.center
+            end          
+
+            Sketchup.write_default( @extname , "disclaimer_acknowledged" , "yes" )
+            
         end 
 
-    end # show_warning
+    end # show_disclaimer
+
 
     # ==================
     
@@ -41,13 +58,13 @@ module AS_Extensions
 
         toolname = "OpenAI Explorer Settings (Experimental)"
         
-        # Show warning once
-        self.show_warning
+        # Show disclaimer once
+        self.show_disclaimer
         
         # Get all the parameters from input dialog
         prompts = [ "Prompt Prefix: " , "Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
         defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "Enter your API key here", "Yes" ]
-        lists = [ "Use SketchUp Ruby|None" , "" , "" , "" , "" , "Yes|No" ]
+        lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
         return if !settings
@@ -65,8 +82,8 @@ module AS_Extensions
 
         toolname = "OpenAI Explorer (Experimental)"
         
-        # Show warning once
-        self.show_warning        
+        # Show disclaimer once
+        self.show_disclaimer        
         
         # Get the settings, including the API key
         defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "", "Yes" ]
@@ -109,7 +126,7 @@ module AS_Extensions
 
                 # Define the prompt for the code completion
                 prompt = ""
-                prompt += settings[0].to_s + "\n" if settings[0].to_s != "None"
+                prompt += settings[0].to_s + "\n"
                 prompt += main_prompt[0].to_s
                 puts "\nPrompt ============\n" + prompt
 
@@ -237,8 +254,19 @@ module AS_Extensions
 
       UI.openURL('https://platform.openai.com/account/api-keys')
 
-    end # show_openai_api     
-      
+    end # show_openai_api   
+    
+    
+    # ==================      
+
+
+    def self.show_openai_tou
+    # Open the OpenAI settings page that has the API Key
+
+      UI.openURL('https://openai.com/policies/terms-of-use')
+
+    end # show_openai_tou        
+
       
     # ==================          
 
@@ -251,6 +279,7 @@ module AS_Extensions
       menu.add_item("OpenAI Settings") { self.openai_explorer_settings }
       menu.add_item("Get OpenAI API Key") { self.show_openai_api }
       menu.add_separator      
+      menu.add_item("OpenAI Terms of Use") { self.show_openai_tou }
       menu.add_item( "Help" ) { self.show_help }
 
       # Let Ruby know we have loaded this file

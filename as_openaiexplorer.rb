@@ -3,11 +3,11 @@
 Copyright 2023, Alexander C. Schreyer
 All rights reserved
 
-THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES,
-INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
-FITNESS FOR A PARTICULAR PURPOSE.
+THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR ANY COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
 
-License:        GPL (http://www.gnu.org/licenses/gpl.html)
+WHERE APPLICABLE, THIRD-PARTY MATERIALS AND THIRD-PARTY PLATFORMS ARE PROVIDED 'AS IS' AND THE USER OF THIS SOFTWARE ASSUMES ALL RISK AND LIABILITY REGARDING ANY USE OF (OR RESULTS OBTAINED THROUGH) THIRD-PARTY MATERIALS OR THIRD-PARTY PLATFORMS.
+
+License:        GPL (https://www.gnu.org/licenses/gpl-3.0.html)
 
 Author :        Alexander Schreyer, www.alexschreyer.net, mail@alexschreyer.net
 
@@ -29,6 +29,10 @@ History:        1.0 (3/18/2023):
                 1.0.2 (3/28/2023):
                 - Fixed error handling bug
                 - Added a double-check for delete requests
+                1.0.3 (TBD)
+                - Added license/disclaimer file
+                - Added better license display on first use
+                - Added link to OpenAI TOU to menu
 
 =end
 
