@@ -1,4 +1,4 @@
-# OpenAI-Explorer-SketchUp
+# OpenAI Explorer Extension for SketchUp
  
 
 Copyright 2023, Alexander C. Schreyer
