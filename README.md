@@ -10,7 +10,7 @@ WHERE APPLICABLE, THIRD-PARTY MATERIALS AND THIRD-PARTY PLATFORMS ARE PROVIDED '
 
 License:        GPL (https://www.gnu.org/licenses/gpl-3.0.html)
 
-Author :        Alexander Schreyer
+Author :        Alexander Schreyer, alexschreyer.net
 
 Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
