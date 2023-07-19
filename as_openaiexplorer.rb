@@ -35,6 +35,8 @@ History:        1.0 (3/18/2023):
                 - Added link to OpenAI TOU to menu
                 - Reverted the prompt prefix to a text box
                 - Disabled code execution as the default
+                - Changed from completion model to chat model (OpenAI changes), see:
+                  https://openai.com/blog/gpt-4-api-general-availability
 
 =end
 
