@@ -63,7 +63,7 @@ module AS_Extensions
         
         # Get all the parameters from input dialog
         prompts = [ "Prompt Prefix: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
-        defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "Enter your API key here", "No" ]
+        defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "Enter your API key here", "No" ]
         lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
@@ -86,7 +86,7 @@ module AS_Extensions
         self.show_disclaimer        
         
         # Get the settings, including the API key
-        defaults = [ "Use SketchUp Ruby" , "text-davinci-003" , "256", "0", "", "Yes" ]
+        defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "Yes" ]
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )     
         
         # Provide a reminder for the API Key when it doesn't have the correct length
@@ -100,7 +100,7 @@ module AS_Extensions
 
             # Get all the parameters from defaults and the input dialog
             prompts = [ "Ask the AI something: " ]
-            defaults = [ "Draw a 2 inch box" ]
+            defaults = [ "Draw a box" ]
             defaults = Sketchup.read_default( @extname , "openai_explorer" , defaults )
             main_prompt = UI.inputbox( prompts , defaults , toolname )
             return if !main_prompt
@@ -111,7 +111,7 @@ module AS_Extensions
 
                 mod = Sketchup.active_model # Open model
 
-                # Always show the Ruby console so that we can see the generated code
+                # Always show the Ruby console so that we can see the generated code/output
                 SKETCHUP_CONSOLE.show
 
                 # Start a new undo group
@@ -167,7 +167,7 @@ module AS_Extensions
                 # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
                 
                 # Double-check for a destructive request
-                badwords = ['delete','remove','erase']
+                badwords = ['delete','remove','erase','kill','expunge']
                 isbad = badwords.any? { |w| prompt.downcase.include? w }
                 if isbad then             
                     delete_check = UI.messagebox "You are asking to delete something. Are you sure you want to execute the generated code?", MB_YESNO
@@ -183,6 +183,10 @@ module AS_Extensions
 
                     # Run the generated code - fingers crossed!
                     eval generated_code    
+                    
+                else
+                
+                    puts "No code was automatically executed. You can turn this feature on in the extension's settings."
 
                 end      
 

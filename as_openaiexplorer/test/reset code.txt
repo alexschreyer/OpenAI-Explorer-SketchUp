@@ -1,5 +1,6 @@
 # Settings reset code:
 
-# Sketchup.write_default( "as_openaiexplorer" , "openai_warning" , nil )
-# Sketchup.write_default( "as_openaiexplorer" , "openai_explorer_settings" , nil )
-# Sketchup.write_default( "as_openaiexplorer" , "openai_explorer" , nil )
+Sketchup.write_default( "as_openaiexplorer" , "openai_warning" , nil )
+Sketchup.write_default( "as_openaiexplorer" , "openai_explorer_settings" , nil )
+Sketchup.write_default( "as_openaiexplorer" , "openai_explorer" , nil )
+Sketchup.write_default( "as_openaiexplorer" , "disclaimer_acknowledged" , nil )

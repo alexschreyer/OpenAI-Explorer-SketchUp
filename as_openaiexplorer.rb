@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          OpenAIExplorer (Experimental)
 
-Version:        1.0.2
+Version:        1.0.3
 
-Date :          3/28/2023
+Date :          7/19/2023
 
 Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
 
@@ -29,13 +29,13 @@ History:        1.0 (3/18/2023):
                 1.0.2 (3/28/2023):
                 - Fixed error handling bug
                 - Added a double-check for delete requests
-                1.0.3 (TBD)
+                1.0.3 (7/19/2023)
                 - Added license/disclaimer file
                 - Added better license display on first use
                 - Added link to OpenAI TOU to menu
-                - Reverted the prompt prefix to a text box
-                - Disabled code execution as the default
-                - Changed from completion model to chat model (OpenAI changes), see:
+                - Reverted the prompt prefix to a text box (user can now enter anything)
+                - Disabled code execution as the default (can be turned on in settings)
+                - Changed from OpenAI completion model to chat model (OpenAI changes), see:
                   https://openai.com/blog/gpt-4-api-general-availability
 
 =end
@@ -55,7 +55,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "1.0.2"
+    @extversion           = "1.0.3"
     @exttitle             = "OpenAI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
