@@ -56,13 +56,13 @@ module AS_Extensions
     def self.openai_explorer_settings
     # Settings dialog
 
-        toolname = "OpenAI Explorer Settings (Experimental)"
+        toolname = "OpenAI Explorer (Experimental) Settings"
         
         # Show disclaimer once
         self.show_disclaimer
         
         # Get all the parameters from input dialog
-        prompts = [ "Prompt Prefix: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
+        prompts = [ "Prompt Prefix / System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
         defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "Enter your API key here", "No" ]
         lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
@@ -76,17 +76,17 @@ module AS_Extensions
     
     # ==================
     
-
-    def self.openai_explorer
-    # Opens a connection to the OpenAI API and executes what comes back
-
+    
+    def self.openai_explorer_dialog
+    # Opens a connection to the OpenAI API and executes what comes back - uses web dialog
+    
         toolname = "OpenAI Explorer (Experimental)"
         
         # Show disclaimer once
         self.show_disclaimer        
         
         # Get the settings, including the API key
-        defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "Yes" ]
+        defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "No" ]
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )     
         
         # Provide a reminder for the API Key when it doesn't have the correct length
@@ -95,125 +95,161 @@ module AS_Extensions
             UI.messagebox("You must enter an OpenAI API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.")
             self.show_openai_api
             self.openai_explorer_settings
-        
+            
         else
+        
+            # Set up the dialog
+            dialog = UI::HtmlDialog.new(
+                dialog_title: toolname,
+                preferences_key: @extname,
+                scrollable: true,
+                resizable: true,
+                top: 100,
+                left: 100,
+                width: 400,
+                height: 600,
+                min_width: 300,
+                min_height: 400,
+                style: UI::HtmlDialog::STYLE_DIALOG
+            )
+            dialog.set_file(File.join(@extdir,@extname,'as_openaiexplorer_ui.html'))
+            dialog.show
+            
+            # Callback to close dialog
+            dialog.add_action_callback("close_dlg") { |action_context|
+                dialog.close
+            }
+            
+            # Callback to show settings dialog
+            dialog.add_action_callback("settings_dlg") { |action_context|
+                self.openai_explorer_settings
+            }            
+            
+            # Callback to submit prompt and get response
+            dialog.add_action_callback("submit_prompt") { |action_context,ui_prompt|
 
-            # Get all the parameters from defaults and the input dialog
-            prompts = [ "Ask the AI something: " ]
-            defaults = [ "Draw a box" ]
-            defaults = Sketchup.read_default( @extname , "openai_explorer" , defaults )
-            main_prompt = UI.inputbox( prompts , defaults , toolname )
-            return if !main_prompt
+                begin
 
-            Sketchup.write_default( @extname , "openai_explorer" , main_prompt.map { |s| s.gsub( '"' , '' ) } )  # Fix for inch pref saving error      
+                    mod = Sketchup.active_model # Open model
+                    
+                    # Get the settings - in case anything changed
+                    defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "No" ]
+                    settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )                         
 
-            begin
-
-                mod = Sketchup.active_model # Open model
-
-                # Always show the Ruby console so that we can see the generated code/output
-                SKETCHUP_CONSOLE.show
-
-                # Start a new undo group
-                mod.start_operation("OpenAI Experiment")
-
-                # Life is always better with some feedback while SketchUp works
-                Sketchup.status_text = toolname + " | Starting request"
-
-                # Set the endpoint and API key for the OpenAI API
-                endpoint = "https://api.openai.com/v1/chat/completions"                
-                api_key = settings[4].to_s
-
-                # Define the prompt for the code completion
-                prompt = ""
-                prompt += "# #{settings[0].to_s}\n"
-                prompt += "# #{main_prompt[0].to_s}"
-                puts "\nPrompt ============\n" + prompt
-
-                # Set up the HTTP request with the API key and prompt
-                uri = URI(endpoint)
-                req = Net::HTTP::Post.new(uri)
-                req["Content-Type"] = "application/json"
-                req["Authorization"] = "Bearer #{api_key}"
-                req.body = JSON.dump({
-                  "model" => settings[1].to_s,
-                  "messages" => [ "role" => "user", "content" => prompt ],
-                  "max_tokens" => settings[2].to_i,
-                  "top_p" => 1,
-                  "n" => 1,
-                  "temperature" => settings[3].to_f,
-                  "stream" => false
-                  # "stop" => "\n"
-                })                                
-
-                # Make the HTTP request to the OpenAI API and parse the response
-                res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-                  http.request(req)
-                end
-                response_body = JSON.parse(res.body)
-
-                # Get the generated code from the API response and clean up a bit
-                generated_code = response_body["choices"][0]["message"]["content"]          
-                generated_code.strip!
-                generated_code.gsub!(/<[^>]*>/,'')  # Strip HTML tags
-
-                # Display the generated code in the Ruby console
-                puts "\nResult ============\n"
-                puts generated_code
-                
-                # Display some statistics in the Ruby console
-                puts "\nStats ============\n"
-                puts "Tokens used: " + response_body["usage"]["total_tokens"].to_s     
-                # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
-                
-                # Double-check for a destructive request
-                badwords = ['delete','remove','erase','kill','expunge']
-                isbad = badwords.any? { |w| prompt.downcase.include? w }
-                if isbad then             
-                    delete_check = UI.messagebox "You are asking to delete something. Are you sure you want to execute the generated code?", MB_YESNO
-                else           
-                    delete_check = 6
-                end
-
-                # Execute code only when desired
-                if ( settings[5].to_s == "Yes" && delete_check == 6 )
+                    # Start a new undo group
+                    mod.start_operation("OpenAI Experiment")
 
                     # Life is always better with some feedback while SketchUp works
-                    Sketchup.status_text = toolname + " | Executing code"            
+                    Sketchup.status_text = toolname + " | Starting request"
 
-                    # Run the generated code - fingers crossed!
-                    eval generated_code    
+                    # Set the endpoint and API key for the OpenAI API
+                    endpoint = "https://api.openai.com/v1/chat/completions"                
+                    api_key = settings[4].to_s
+
+                    # Define the prompt for the code completion
+                    prompt = ""
+                    prompt += "# #{settings[0].to_s}\n" if settings[0].to_s != ""
+                    prompt += "# #{ui_prompt.to_s}"
+                    puts "\nPrompt ============\n" + prompt
                     
-                else
+                    js = "add_prompt(#{prompt.dump})"
+                    dialog.execute_script(js)                    
+
+                    # Set up the HTTP request with the API key and prompt
+                    uri = URI(endpoint)
+                    req = Net::HTTP::Post.new(uri)
+                    req["Content-Type"] = "application/json"
+                    req["Authorization"] = "Bearer #{api_key}"
+                    req.body = JSON.dump({
+                      "model" => settings[1].to_s,
+                      "messages" => [ "role" => "user", "content" => prompt ],
+                      "max_tokens" => settings[2].to_i,
+                      "top_p" => 1,
+                      "n" => 1,
+                      "temperature" => settings[3].to_f,
+                      "stream" => false
+                      # "stop" => "\n"
+                    })                                
+
+                    # Make the HTTP request to the OpenAI API and parse the response
+                    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+                      http.request(req)
+                    end
+                    response_body = JSON.parse(res.body)
+
+                    # Get the generated code from the API response and clean up a bit
+                    generated_code = response_body["choices"][0]["message"]["content"]          
+                    generated_code.strip!
+                    generated_code.gsub!(/<[^>]*>/,'')  # Strip HTML tags
+
+                    # Display the generated code in the Ruby console
+                    puts "\nResult ============\n"
+                    puts generated_code
+
+                    # Display some statistics in the Ruby console
+                    info = "Tokens used: " + response_body["usage"]["total_tokens"].to_s                    
+                    puts "\nStats ============\n"
+                    puts info     
+                    # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
+
+                    # Double-check for a destructive request
+                    badwords = ['delete','remove','erase','kill','expunge']
+                    isbad = badwords.any? { |w| prompt.downcase.include? w }
+                    if isbad then             
+                        delete_check = UI.messagebox "You are asking to delete something. Are you sure you want to execute the generated code?", MB_YESNO
+                    else           
+                        delete_check = 6
+                    end
+
+                    # Execute code only when desired
+                    if ( settings[5].to_s == "Yes" && delete_check == 6 )
+
+                        # Life is always better with some feedback while SketchUp works
+                        Sketchup.status_text = toolname + " | Executing code"         
+                        
+                        info += " | Code was executed."
+
+                        # Run the generated code - fingers crossed!
+                        eval generated_code    
+
+                    else
+
+                        nocode = "No code was executed. You can turn this feature on in the extension's settings."
+                        info += " | " + nocode
+                        puts nocode
+
+                    end      
+
+                    # Life is always better with some feedback while SketchUp works
+                    Sketchup.status_text = toolname + " | Done"     
+
+                    # Finish a new undo group
+                    mod.commit_operation
+
+                 rescue Exception => e    
+
+                    # Provide an error message for SketchUp errors
+                    errmsg = "(SketchUp error) #{e}. "
+
+                    # And provide one for OpenAI errors if they get returned
+                    if ( defined?(response_body['error']['message']) != nil ) then
+                        errmsg += "(OpenAI error) #{response_body['error']['message']}"
+                    end
+
+                    puts "This request generated an error\n"                
+                    info += " | <span class='error'><strong>ERROR:</strong> " + errmsg + "</span>"
+
+                end    
                 
-                    puts "No code was automatically executed. You can turn this feature on in the extension's settings."
+                # Display result and stats in the dialog
+                js = "add_response(#{generated_code.dump},#{info.dump})"
+                dialog.execute_script(js)                
 
-                end      
-
-                # Life is always better with some feedback while SketchUp works
-                Sketchup.status_text = toolname + " | Done"     
-
-                # Finish a new undo group
-                mod.commit_operation
-
-             rescue Exception => e    
-
-                # Provide an error message for SketchUp errors
-                errmsg = "Couldn't do it!\n\nSketchUp error: #{e}"
-                
-                # And provide one for OpenAI errors if they get returned
-                if ( defined?(response_body['error']['message']) != nil ) then
-                    errmsg += "\n\nOpenAI error: #{response_body['error']['message']}"
-                end
-                
-                puts "This request generated an error\n"                
-                UI.messagebox( errmsg )
-
-            end     
+            }  # END add_action_callback("submit_prompt")
             
-        end
-
-    end # openai_explorer
+        end    
+    
+    end # openai_explorer_dialog    
 
 
     # ==================
@@ -279,8 +315,8 @@ module AS_Extensions
 
       # Add to the SketchUp Extensions menu
       menu = UI.menu("Plugins").add_submenu( @exttitle )
-      menu.add_item("OpenAI Explorer") { self.openai_explorer }
-      menu.add_item("OpenAI Settings") { self.openai_explorer_settings }
+      menu.add_item("OpenAI Explorer Dialog") { self.openai_explorer_dialog }
+      menu.add_item("OpenAI Explorer Settings") { self.openai_explorer_settings }
       menu.add_item("Get OpenAI API Key") { self.show_openai_api }
       menu.add_separator      
       menu.add_item("OpenAI Terms of Use") { self.show_openai_tou }

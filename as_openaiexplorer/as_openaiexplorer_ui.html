@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>OpenAI Explorer Dialog</title>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <!-- Use compatibility mode in IE to allow for newer features -->
+        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <style>
+            * {font-family: "Open Sans", Arial, Helvetica, sans-serif; font-size:13px;}
+            body {background-color:#f3f2f7; padding:5px; min-width:220px;}
+            h1, label, p {color:#363545;}
+            fieldset {color:#363545; background-color:#f9f9fb; padding:10px; border:none;}
+            legend {font-weight:bold; margin:0; padding:5px 0 0 0;}
+            a, a:hover, a:visited {text-decoration:underline; font-size:inherit; color:#4d5259;}
+            a:hover {text-decoration:none;}
+            input, textarea {color:#363545; background-color:#f3f2f7; border:none; border-bottom:1px solid #363545; padding:5px 10px;}
+            input[type=submit], input[type=button] {color:#f9f9fb; background-color:#005f9e; border:none; padding:5px 10px; font-weight:bold;}
+            input[type=submit]:hover, input[type=button]:hover {background-color:#005187;}
+            label { display:block; width: 146px; float:left; }
+            /* Output element */
+            #output { width:calc(100% - 10px); height:calc(100vh - 140px); display:block; overflow:auto; background-color:#fff; padding:5px; }
+            .prompt { background-color:#f9f9fb; margin:5px; padding:5px 10px; width:80%; border-radius:10px; clear:both; float:left; overflow:hidden; }
+            .response { background-color:#005f9e; color:#fff; margin:5px; padding:5px 10px; width:80%; border-radius:10px; clear:both; float:right; overflow:hidden; }
+            .error, .error strong { font-size: inherit; background-color:#fff5e4; }
+            .details { font-size: 0.9em; margin:0; padding:0 10px; width:80%; clear:both; float:right; text-align:right; }
+            /* Typing animation */
+            .typing { position: relative; }
+            .typing span { content: ""; -webkit-animation: blink 1.5s infinite; animation: blink 1.5s infinite; -webkit-animation-fill-mode: both; animation-fill-mode: both; height: 8px;  width: 8px; background: #fff; position: absolute; left: 0; top: 5px; border-radius: 50%; }
+            .typing span:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; margin-left: 15px; } 
+            .typing span:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; margin-left: 30px; }
+            @-webkit-keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
+            @keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
+        </style>
+        <script src="src/jquery-3.7.0.min.js"></script>
+    </head>
+    <body>
+      <div id="output"></div>
+        <form id="OpenAISubmit" name="OpenAISubmit" onsubmit="return false;">      
+          <p><input type="text" id="prompt" name="prompt" style="width:calc(100% - 70px);" placeholder="Ask the AI anything" />&nbsp;&nbsp;<input type="submit" id="submit" value="Go" style="float:right;" /></p>   
+          <p><input type="button" id="settings" value="Settings" style="font-weight:bold;" />&nbsp;&nbsp;<input type="button" id="cancel" value="Cancel" style="font-weight:bold;" /></p>
+        </form>
+        <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a></p>
+        <script>     
+        
+        // Function to remove the temp box and output the response
+        function add_response(resp,info) {
+        
+            jQuery('.temp').remove();
+            jQuery('#output').append("<div class='response'>" + resp.replace(/\n/g, '<br />') + "</div>");
+            jQuery('#output').append("<div class='details'>" + info + "</div>");
+            jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
+            jQuery('#prompt').select();
+            
+        };           
+        
+        // Function to output the prompt (and add a loading animation)
+        function add_prompt(prompt) {
+        
+              jQuery('#output').append("<div class='prompt'>" + prompt.replace(/\n/g, '<br />') + "</div>");
+              jQuery('#output').append("<div class='response temp'><div class='typing'><span></span><span></span><span></span></div> &nbsp;</div>");
+              jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
+              
+        };             
+
+        // Submit the prompt to SU
+        jQuery("#OpenAISubmit").submit(function(event){
+        
+              event.preventDefault();
+
+              if (jQuery('#prompt').val().length == 0) {
+                  alert('You must enter a prompt.');
+                  return false;
+              }
+              
+              prompt = jQuery('#prompt').val();
+              sketchup.submit_prompt(prompt);
+              
+        });
+          
+        // Close the dialog  
+        jQuery('#cancel').click(function(){
+            sketchup.close_dlg();
+        });
+        
+        // Show the settings dialog
+        jQuery('#settings').click(function(){
+            sketchup.settings_dlg();
+        });        
+        
+        // Select the prompt on startup
+        jQuery(document).ready(function() {                
+            jQuery('#prompt').select();
+        });
+        
+    </script>
+    </body>
+</html>
