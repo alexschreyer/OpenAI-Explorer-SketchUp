@@ -141,6 +141,7 @@ module AS_Extensions
 
                     # Life is always better with some feedback while SketchUp works
                     Sketchup.status_text = toolname + " | Starting request"
+                    info = ""
 
                     # Set the endpoint and API key for the OpenAI API
                     endpoint = "https://api.openai.com/v1/chat/completions"                
@@ -187,7 +188,7 @@ module AS_Extensions
                     puts generated_code
 
                     # Display some statistics in the Ruby console
-                    info = "Tokens used: " + response_body["usage"]["total_tokens"].to_s                    
+                    info += "Tokens used: " + response_body["usage"]["total_tokens"].to_s                    
                     puts "\nStats ============\n"
                     puts info     
                     # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
@@ -227,22 +228,29 @@ module AS_Extensions
                     mod.commit_operation
 
                  rescue Exception => e    
+                 
+                    errmsg = ""
+                     
+                    # Provide an error message for OpenAI errors if they get returned
+                    if ( defined?(response_body['error']['message']) != nil ) then
+                        errmsg += "<b>(OpenAI error:)</b> #{response_body['error']['message']}. "
+                    end                     
 
                     # Provide an error message for SketchUp errors
-                    errmsg = "(SketchUp error) #{e}. "
+                    errmsg += "<b>(SketchUp error:)</b> #{e}. "
 
-                    # And provide one for OpenAI errors if they get returned
-                    if ( defined?(response_body['error']['message']) != nil ) then
-                        errmsg += "(OpenAI error) #{response_body['error']['message']}"
-                    end
-
-                    puts "This request generated an error\n"                
+                    puts "This request generated an error. See dialog for details.\n"                
                     info += " | <span class='error'><strong>ERROR:</strong> " + errmsg + "</span>"
 
                 end    
                 
                 # Display result and stats in the dialog
-                js = "add_response(#{generated_code.dump},#{info.dump})"
+                if generated_code!=nil
+                    js = "add_response(#{generated_code.dump},#{info.dump})"
+                else
+                    js = "add_response('That did not work. See note below...',#{info.dump})"
+                end
+                
                 dialog.execute_script(js)                
 
             }  # END add_action_callback("submit_prompt")
