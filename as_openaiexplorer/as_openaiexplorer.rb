@@ -138,6 +138,9 @@ module AS_Extensions
 
                     # Start a new undo group
                     mod.start_operation("OpenAI Experiment")
+                    
+                    # Start a timer
+                    t1 = Time.now
 
                     # Life is always better with some feedback while SketchUp works
                     Sketchup.status_text = toolname + " | Starting request"
@@ -211,6 +214,7 @@ module AS_Extensions
                         info += " | Code was executed."
 
                         # Run the generated code - fingers crossed!
+                        generated_code = generated_code[/```ruby(.*?)```/m, 1].strip! if generated_code.include? "```"     # For quoted code in gpt-4
                         eval generated_code    
 
                     else
@@ -223,6 +227,10 @@ module AS_Extensions
 
                     # Life is always better with some feedback while SketchUp works
                     Sketchup.status_text = toolname + " | Done"     
+                    
+                    # Measure duration
+                    duration = Time.now - t1
+                    info += " | Time elapsed: %0.2fs" % duration
 
                     # Finish a new undo group
                     mod.commit_operation
@@ -233,11 +241,11 @@ module AS_Extensions
                      
                     # Provide an error message for OpenAI errors if they get returned
                     if ( defined?(response_body['error']['message']) != nil ) then
-                        errmsg += "<b>(OpenAI error:)</b> #{response_body['error']['message']}. "
+                        errmsg += "<b>(OpenAI:)</b> #{response_body['error']['message']}. "
                     end                     
 
                     # Provide an error message for SketchUp errors
-                    errmsg += "<b>(SketchUp error:)</b> #{e}. "
+                    errmsg += "<b>(SketchUp:)</b> #{e}. "
 
                     puts "This request generated an error. See dialog for details.\n"                
                     info += " | <span class='error'><strong>ERROR:</strong> " + errmsg + "</span>"

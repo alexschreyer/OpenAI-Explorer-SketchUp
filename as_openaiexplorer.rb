@@ -42,6 +42,8 @@ History:        1.0 (3/18/2023):
                 - Moved error reporting into dialog to reduce pop-ups
                 2.1 (9/21/2023):
                 - Better error handling
+                - Fixed gpt-4 markdown extraction issue
+                - Added a timer
 
 =end
 
