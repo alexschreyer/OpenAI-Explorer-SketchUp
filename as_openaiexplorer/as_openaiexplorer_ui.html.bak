@@ -6,7 +6,7 @@
         <!-- Use compatibility mode in IE to allow for newer features -->
         <meta http-equiv="x-ua-compatible" content="IE=edge">
         <style>
-            * {font-family: "Open Sans", Arial, Helvetica, sans-serif; font-size:13px;}
+            * {font-family: "Open Sans", Arial, Helvetica, sans-serif; font-size:13px!important;}
             body {background-color:#f3f2f7; padding:5px; min-width:220px;}
             h1, label, p {color:#363545;}
             fieldset {color:#363545; background-color:#f9f9fb; padding:10px; border:none;}

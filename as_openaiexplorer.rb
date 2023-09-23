@@ -44,6 +44,7 @@ History:        1.0 (3/18/2023):
                 - Better error handling
                 - Fixed gpt-4 markdown extraction issue
                 - Added a timer
+                - Set a 30 seconds read timeout for hung requests
 
 =end
 

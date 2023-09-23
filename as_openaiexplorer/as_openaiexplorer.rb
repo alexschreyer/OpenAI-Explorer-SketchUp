@@ -134,13 +134,13 @@ module AS_Extensions
                     
                     # Get the settings - in case anything changed
                     defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "No" ]
-                    settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )                         
-
-                    # Start a new undo group
-                    mod.start_operation("OpenAI Experiment")
+                    settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )        
                     
                     # Start a timer
                     t1 = Time.now
+
+                    # Start a new undo group
+                    mod.start_operation("OpenAI Experiment")
 
                     # Life is always better with some feedback while SketchUp works
                     Sketchup.status_text = toolname + " | Starting request"
@@ -176,7 +176,7 @@ module AS_Extensions
                     })                                
 
                     # Make the HTTP request to the OpenAI API and parse the response
-                    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
+                    res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, read_timeout: 30) do |http|
                       http.request(req)
                     end
                     response_body = JSON.parse(res.body)
@@ -227,10 +227,6 @@ module AS_Extensions
 
                     # Life is always better with some feedback while SketchUp works
                     Sketchup.status_text = toolname + " | Done"     
-                    
-                    # Measure duration
-                    duration = Time.now - t1
-                    info += " | Time elapsed: %0.2fs" % duration
 
                     # Finish a new undo group
                     mod.commit_operation
@@ -241,16 +237,22 @@ module AS_Extensions
                      
                     # Provide an error message for OpenAI errors if they get returned
                     if ( defined?(response_body['error']['message']) != nil ) then
-                        errmsg += "<b>(OpenAI:)</b> #{response_body['error']['message']}. "
+                        errmsg += "<b>(OpenAI:)</b> #{response_body['error']['message']} "
                     end                     
 
                     # Provide an error message for SketchUp errors
                     errmsg += "<b>(SketchUp:)</b> #{e}. "
 
                     puts "This request generated an error. See dialog for details.\n"                
-                    info += " | <span class='error'><strong>ERROR:</strong> " + errmsg + "</span>"
 
                 end    
+                
+                # Measure duration
+                duration = Time.now - t1
+                info += " | Time elapsed: %0.2fs" % duration     
+                
+                # Did we get an error?
+                info += " | <span class='error'><strong>ERROR:</strong> " + errmsg + "</span>" if errmsg != nil
                 
                 # Display result and stats in the dialog
                 if generated_code!=nil
