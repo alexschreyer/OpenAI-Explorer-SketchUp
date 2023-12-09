@@ -16,6 +16,10 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
+    # Set up some module-wide variables
+    @def_system = "Generate only valid, self-contained SketchUp Ruby code without any method definitions."
+    @def_model = "gpt-3.5-turbo-1106"
+  
   
     # ==================
     
@@ -63,7 +67,7 @@ module AS_Extensions
         
         # Get all the parameters from input dialog
         prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
-        defaults = [ "Generate concise SketchUp Ruby code." , "gpt-3.5-turbo" , "256", "0", "Enter your API key here", "No" ]
+        defaults = [ @def_system , @def_model , "256", "0", "Enter your API key here", "No" ]
         lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
@@ -86,7 +90,7 @@ module AS_Extensions
         self.show_disclaimer        
         
         # Get the settings, including the API key
-        defaults = [ "Generate concise SketchUp Ruby code." , "gpt-3.5-turbo" , "256", "0", "", "No" ]
+        defaults = [ @def_system , @def_model , "256", "0", "", "No" ]
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )     
         
         # Provide a reminder for the API Key when it doesn't have the correct length
@@ -133,7 +137,7 @@ module AS_Extensions
                     mod = Sketchup.active_model # Open model
                     
                     # Get the settings - in case anything changed
-                    defaults = [ "Generate concise SketchUp Ruby code." , "gpt-3.5-turbo" , "256", "0", "", "No" ]
+                    defaults = [ @def_system , @def_model , "256", "0", "", "No" ]
                     settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )        
                     
                     # Start a timer
