@@ -62,8 +62,8 @@ module AS_Extensions
         self.show_disclaimer
         
         # Get all the parameters from input dialog
-        prompts = [ "Prompt Prefix / System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
-        defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "Enter your API key here", "No" ]
+        prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
+        defaults = [ "Generate concise SketchUp Ruby code." , "gpt-3.5-turbo" , "256", "0", "Enter your API key here", "No" ]
         lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
@@ -86,7 +86,7 @@ module AS_Extensions
         self.show_disclaimer        
         
         # Get the settings, including the API key
-        defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "No" ]
+        defaults = [ "Generate concise SketchUp Ruby code." , "gpt-3.5-turbo" , "256", "0", "", "No" ]
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )     
         
         # Provide a reminder for the API Key when it doesn't have the correct length
@@ -133,7 +133,7 @@ module AS_Extensions
                     mod = Sketchup.active_model # Open model
                     
                     # Get the settings - in case anything changed
-                    defaults = [ "Use SketchUp Ruby" , "gpt-3.5-turbo" , "256", "0", "", "No" ]
+                    defaults = [ "Generate concise SketchUp Ruby code." , "gpt-3.5-turbo" , "256", "0", "", "No" ]
                     settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )        
                     
                     # Start a timer
@@ -151,10 +151,10 @@ module AS_Extensions
                     api_key = settings[4].to_s
 
                     # Define the prompt for the code completion
-                    prompt = ""
-                    prompt += "# #{settings[0].to_s}\n" if settings[0].to_s != ""
-                    prompt += "# #{ui_prompt.to_s}"
-                    puts "\nPrompt ============\n" + prompt
+                    prompt = ui_prompt.to_s
+                    sys_prompt = settings[0].to_s
+                    sys_prompt += " Do not generate any code that affects the file system." if ( settings[5].to_s == "Yes" )
+                    puts "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                     
                     js = "add_prompt(#{prompt.dump})"
                     dialog.execute_script(js)                    
@@ -166,7 +166,7 @@ module AS_Extensions
                     req["Authorization"] = "Bearer #{api_key}"
                     req.body = JSON.dump({
                       "model" => settings[1].to_s,
-                      "messages" => [ "role" => "user", "content" => prompt ],
+                      "messages" => [ { "role" => "system", "content" => "#{sys_prompt}" } , { "role" => "user", "content" => "#{prompt}" } ],
                       "max_tokens" => settings[2].to_i,
                       "top_p" => 1,
                       "n" => 1,
@@ -213,8 +213,8 @@ module AS_Extensions
                         
                         info += " | Code was executed."
 
-                        # Run the generated code - fingers crossed!
-                        generated_code = generated_code[/```ruby(.*?)```/m, 1].strip! if generated_code.include? "```"     # For quoted code in gpt-4
+                        # Run the generated code
+                        generated_code = generated_code[/```ruby(.*?)```/m, 1].strip! if generated_code.include? "```"     # For quoted code
                         eval generated_code    
 
                     else
@@ -323,7 +323,29 @@ module AS_Extensions
 
       UI.openURL('https://openai.com/policies/terms-of-use')
 
-    end # show_openai_tou        
+    end # show_openai_tou       
+    
+    
+    # ==================      
+
+
+    def self.reset_settings
+    # Resets all extension settings to their defaults
+    
+      q = "Do you want to reset all of the extension settings to their defaults? This is mainly for troubleshooting purposes."
+      if UI.messagebox( q , MB_YESNO ) == 6
+
+        Sketchup.write_default( @extname , "openai_warning" , nil )
+        Sketchup.write_default( @extname , "openai_explorer_settings" , nil )
+        Sketchup.write_default( @extname , "openai_explorer" , nil )
+        Sketchup.write_default( @extname , "disclaimer_acknowledged" , nil )
+
+        q = "All settings have been reset."
+        UI.messagebox( q , MB_OK )
+      
+      end
+
+    end # reset_settings      
 
       
     # ==================          
@@ -338,7 +360,8 @@ module AS_Extensions
       menu.add_item("Get OpenAI API Key") { self.show_openai_api }
       menu.add_separator      
       menu.add_item("OpenAI Terms of Use") { self.show_openai_tou }
-      menu.add_item( "Help" ) { self.show_help }
+      menu.add_item("Reset extension settings") { self.reset_settings }
+      menu.add_item("Help") { self.show_help }
 
       # Let Ruby know we have loaded this file
       file_loaded(__FILE__)

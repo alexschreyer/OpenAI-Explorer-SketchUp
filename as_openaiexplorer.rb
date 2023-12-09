@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          OpenAIExplorer (Experimental)
 
-Version:        2.1
+Version:        2.2
 
-Date :          9/21/2023
+Date :          12/9/2023
 
 Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
 
@@ -40,11 +40,16 @@ History:        1.0 (3/18/2023):
                 2.0 (7/23/2023):
                 - Created dialog-based input for more chat-like experience
                 - Moved error reporting into dialog to reduce pop-ups
-                2.1 (9/21/2023):
+                2.1 (9/23/2023):
                 - Better error handling
                 - Fixed gpt-4 markdown extraction issue
                 - Added a timer
                 - Set a 30 seconds read timeout for hung requests
+                2.2 (12/9/2023):
+                - Implemented correct system message handling as per OpenAI API
+                - Added system message to prevent file access when code is to be executed
+                - Updated default system message
+                - Added menu item to reset extension settings (for troubleshooting)
 
 =end
 
@@ -63,7 +68,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "2.1"
+    @extversion           = "2.2"
     @exttitle             = "OpenAI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
