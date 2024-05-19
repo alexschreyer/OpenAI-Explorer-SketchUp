@@ -1,6 +1,6 @@
 =begin
 
-Copyright 2023, Alexander C. Schreyer
+Copyright 2023-2024, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR ANY COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          OpenAIExplorer (Experimental)
 
-Version:        2.2
+Version:        2.3
 
-Date :          12/9/2023
+Date :          5/18/2024
 
 Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
 
@@ -50,6 +50,13 @@ History:        1.0 (3/18/2023):
                 - Added system message to prevent file access when code is to be executed
                 - Updated default system message
                 - Added menu item to reset extension settings (for troubleshooting)
+                2.3 (5/18/2024):
+                - Updated some defaults
+                - Updated button design
+                - Added AI "memory". User can now select how many messages get sent to OpenAI.                
+                - Added screenshot image upload for vision-capable models (e.g. gpt-4o)
+                - Added resolution control for uploaded images
+                
 
 =end
 
@@ -68,7 +75,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "2.2"
+    @extversion           = "2.3"
     @exttitle             = "OpenAI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     

@@ -7,6 +7,7 @@ require 'sketchup.rb'
 require 'net/http'
 require 'uri'
 require 'json'
+require 'base64'
 
 
 # ==================
@@ -16,12 +17,54 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    # Set up some module-wide variables
-    @def_system = "Generate only valid, self-contained SketchUp Ruby code without any method definitions."
-    @def_model = "gpt-3.5-turbo-1106"
+  
+    # Set up some module-wide defaults
+    @default_settings = [ 
+      "Generate only valid, self-contained SketchUp Ruby code without any method definitions.",  # System Message
+      "gpt-3.5-turbo",  # Chat Completion Model
+      "256",  # Max. Tokens
+      "0.1",  # Temperature
+      "Enter your API key here",  # OpenAI API key
+      "No",  # Execute code
+      "No",  # Submit model view with request
+      "low",  # Model view submission quality
+      "1"  # Number of submitted messages (user and assistant)
+    ]
+    
+    
+    # Create an empty array for all AI messages
+    @ai_messages = []    
   
   
     # ==================
+    
+    
+    def self.encoded_screenshot
+    # Saves and encodes the current model view in Base64 format
+    
+        # Save the current model view to a temp location
+        dir = (defined? Sketchup.temp_dir) ? Sketchup.temp_dir : ENV['TMPDIR'] || ENV['TMP'] || ENV['TEMP']
+        file_loc = File.join( dir, "temp.png" )
+        keys = {
+            :filename => file_loc,
+            :antialias => true,
+            :scale_factor => 1,
+            :compression => 0.8,
+            :transparent => false
+        }
+        img = Sketchup.active_model.active_view.write_image keys
+        
+        # Encode the file as Base64
+        base64_image = File.open(file_loc, "rb") do |file|
+            Base64.strict_encode64(file.read)
+        end
+        
+        return base64_image
+    
+    end # encoded_screenshot    
+    
+    
+    # ==================    
     
     
     def self.show_disclaimer
@@ -66,10 +109,9 @@ module AS_Extensions
         self.show_disclaimer
         
         # Get all the parameters from input dialog
-        prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: " ]
-        defaults = [ @def_system , @def_model , "256", "0", "Enter your API key here", "No" ]
-        lists = [ "" , "" , "" , "" , "" , "Yes|No" ]
-        defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )
+        prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: ", "Submit model view with request: ", "Model view submission quality: ", "Submit # of prompts: " ]
+        lists = [ "" , "" , "" , "" , "" , "Yes|No", "Yes|No", "low|high", "1|3|5|9" ]
+        defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
         return if !settings
 
@@ -90,8 +132,7 @@ module AS_Extensions
         self.show_disclaimer        
         
         # Get the settings, including the API key
-        defaults = [ @def_system , @def_model , "256", "0", "", "No" ]
-        settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )     
+        settings = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )     
         
         # Provide a reminder for the API Key when it doesn't have the correct length
         if settings[4].length < 50 then
@@ -101,6 +142,9 @@ module AS_Extensions
             self.openai_explorer_settings
             
         else
+        
+            # Reset the message array on each dialog open
+            @ai_messages.clear
         
             # Set up the dialog
             dialog = UI::HtmlDialog.new(
@@ -137,8 +181,7 @@ module AS_Extensions
                     mod = Sketchup.active_model # Open model
                     
                     # Get the settings - in case anything changed
-                    defaults = [ @def_system , @def_model , "256", "0", "", "No" ]
-                    settings = Sketchup.read_default( @extname , "openai_explorer_settings" , defaults )        
+                    settings = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )        
                     
                     # Start a timer
                     t1 = Time.now
@@ -161,7 +204,25 @@ module AS_Extensions
                     puts "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                     
                     js = "add_prompt(#{prompt.dump})"
-                    dialog.execute_script(js)                    
+                    dialog.execute_script(js)      
+                    
+                    # Set up default user mesage (only prompt, no image)
+                    user_message = { "role" => "user", "content" => "#{prompt}" }
+                    
+                    # Modify user mesage if we want to include the model view
+                    if ( settings[6].to_s == "Yes" ) 
+                        user_message = { 
+                            "role" => "user", "content" => [
+                               { "type" => "text", "text" => "#{prompt}" },
+                               { "type" => "image_url", "image_url" => 
+                                   { "url" => "data:image/png;base64,#{encoded_screenshot}", 
+                                     "detail" => "#{settings[7]}" } 
+                               }
+                             ] }
+                    end
+                    
+                    # Add the request to the array of messages
+                    @ai_messages.push( user_message )
 
                     # Set up the HTTP request with the API key and prompt
                     uri = URI(endpoint)
@@ -170,20 +231,23 @@ module AS_Extensions
                     req["Authorization"] = "Bearer #{api_key}"
                     req.body = JSON.dump({
                       "model" => settings[1].to_s,
-                      "messages" => [ { "role" => "system", "content" => "#{sys_prompt}" } , { "role" => "user", "content" => "#{prompt}" } ],
+                      "messages" => [{ "role" => "system", "content" => "#{sys_prompt}" }] + @ai_messages.last( settings[8].to_i ),
                       "max_tokens" => settings[2].to_i,
                       "top_p" => 1,
                       "n" => 1,
                       "temperature" => settings[3].to_f,
                       "stream" => false
                       # "stop" => "\n"
-                    })                                
+                    })      
 
                     # Make the HTTP request to the OpenAI API and parse the response
                     res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, read_timeout: 30) do |http|
                       http.request(req)
                     end
                     response_body = JSON.parse(res.body)
+                    
+                    # Add the response to the array of messages
+                    @ai_messages.push( response_body["choices"][0]["message"] )
 
                     # Get the generated code from the API response and clean up a bit
                     generated_code = response_body["choices"][0]["message"]["content"]          
