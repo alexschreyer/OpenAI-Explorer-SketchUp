@@ -21,8 +21,8 @@
             label { display:block; width: 146px; float:left; }
             /* Output element */
             #output { width:calc(100% - 10px); height:calc(100vh - 150px); display:block; overflow:auto; background-color:#fff; padding:5px; }
-            .prompt { background-color:#f9f9fb; margin:5px; padding:5px 10px; width:80%; border-radius:10px; clear:both; float:left; overflow:hidden; }
-            .response { background-color:#005f9e; color:#fff; margin:5px; padding:5px 10px; width:80%; border-radius:10px; clear:both; float:right; overflow:hidden; }
+            .prompt { background-color:#dcedf9; margin:5px; padding:5px 10px; width:80%; border-radius:10px; clear:both; float:left; overflow:hidden; }
+            .response { background-color:#005f9e; color:#fff; margin:5px; padding:10px; width:80%; border-radius:10px; clear:both; float:right; overflow:hidden; }
             .error, .error strong { font-size: inherit; background-color:#fff5e4; }
             .details { font-size: 0.9em; margin:0; padding:0 10px; width:80%; clear:both; float:right; text-align:right; }
             /* Typing animation */
@@ -30,6 +30,7 @@
             .typing span { content: ""; -webkit-animation: blink 1.5s infinite; animation: blink 1.5s infinite; -webkit-animation-fill-mode: both; animation-fill-mode: both; height: 8px;  width: 8px; background: #fff; position: absolute; left: 0; top: 5px; border-radius: 50%; }
             .typing span:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; margin-left: 15px; } 
             .typing span:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; margin-left: 30px; }
+            code { font-family: monospace; font-size: 1em; display: block; padding: 1em; background-color:#dcedf9; color:#363545; border-radius:10px; }
             @-webkit-keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
             @keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
         </style>

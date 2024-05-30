@@ -56,6 +56,10 @@ History:        1.0 (3/18/2023):
                 - Added AI "memory". User can now select how many messages get sent to OpenAI.                
                 - Added screenshot image upload for vision-capable models (e.g. gpt-4o)
                 - Added resolution control for uploaded images
+                2.4 ():
+                - Now renders bold text and code visually in responses
+                - Better response handling
+                - Dialog now always opens centered
                 
 
 =end

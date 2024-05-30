@@ -162,6 +162,7 @@ module AS_Extensions
             )
             dialog.set_file(File.join(@extdir,@extname,'as_openaiexplorer_ui.html'))
             dialog.show
+            dialog.center
             
             # Callback to close dialog
             dialog.add_action_callback("close_dlg") { |action_context|
@@ -249,14 +250,14 @@ module AS_Extensions
                     # Add the response to the array of messages
                     @ai_messages.push( response_body["choices"][0]["message"] )
 
-                    # Get the generated code from the API response and clean up a bit
-                    generated_code = response_body["choices"][0]["message"]["content"]          
-                    generated_code.strip!
-                    generated_code.gsub!(/<[^>]*>/,'')  # Strip HTML tags
+                    # Get the generated response from the API response and clean up a bit
+                    generated_response = response_body["choices"][0]["message"]["content"]          
+                    generated_response.strip!
+                    # generated_response.gsub!(/<[^>]*>/,'')  # Strip HTML tags
 
-                    # Display the generated code in the Ruby console
+                    # Display the generated response in the Ruby console
                     puts "\nResult ============\n"
-                    puts generated_code
+                    puts generated_response
 
                     # Display some statistics in the Ruby console
                     info += "Tokens used: " + response_body["usage"]["total_tokens"].to_s                    
@@ -281,9 +282,15 @@ module AS_Extensions
                         
                         info += " | Code was executed."
 
-                        # Run the generated code
-                        generated_code = generated_code[/```ruby(.*?)```/m, 1].strip! if generated_code.include? "```"     # For quoted code
-                        eval generated_code    
+                        # Extract the generated code
+                        if generated_response.include? "```"     # For quoted code
+                            generated_code = generated_response[/```ruby(.*?)```/m, 1].strip! 
+                        else
+                            generated_code = generated_response
+                        end
+                        
+                        # Execute it
+                        eval generated_code
 
                     else
 
@@ -321,10 +328,15 @@ module AS_Extensions
                 
                 # Did we get an error?
                 info += " | <span class='error'><strong>ERROR:</strong> " + errmsg + "</span>" if errmsg != nil
-                
+ 
                 # Display result and stats in the dialog
-                if generated_code!=nil
-                    js = "add_response(#{generated_code.dump},#{info.dump})"
+                if generated_response!=nil
+                    # Clean up output a bit
+                    generated_response.gsub!( /\*\*([\w\s]+)\*\*/ , "<b>#{$1}</b>" )
+                    generated_response.gsub!( /\`\`\`[^\s]+\n/, "<code>" )
+                    generated_response.gsub!( /\`\`\`\n/, "</code>" )
+                    generated_response.gsub!( /```/, "" )
+                    js = "add_response(#{generated_response.dump},#{info.dump})"
                 else
                     js = "add_response('That did not work. See note below...',#{info.dump})"
                 end
