@@ -64,7 +64,7 @@ module AS_Extensions
     end # encoded_screenshot    
     
     
-    # ==================    
+    # ==================        
     
     
     def self.show_disclaimer
@@ -204,23 +204,26 @@ module AS_Extensions
                     sys_prompt += " Do not generate any code that affects the file system." if ( settings[5].to_s == "Yes" )
                     puts "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                     
-                    js = "add_prompt(#{prompt.dump})"
-                    dialog.execute_script(js)      
-                    
                     # Set up default user mesage (only prompt, no image)
                     user_message = { "role" => "user", "content" => "#{prompt}" }
                     
                     # Modify user mesage if we want to include the model view
                     if ( settings[6].to_s == "Yes" ) 
+                        base64_image = encoded_screenshot;
                         user_message = { 
                             "role" => "user", "content" => [
                                { "type" => "text", "text" => "#{prompt}" },
                                { "type" => "image_url", "image_url" => 
-                                   { "url" => "data:image/png;base64,#{encoded_screenshot}", 
+                                   { "url" => "data:image/png;base64,#{base64_image}", 
                                      "detail" => "#{settings[7]}" } 
                                }
                              ] }
+                             
+                        prompt = prompt + "<br /><img src='data:image/png;base64,#{base64_image}' class='thumbnail' />"
                     end
+                    
+                    js = "add_prompt(#{prompt.dump})"
+                    dialog.execute_script(js)  
                     
                     # Add the request to the array of messages
                     @ai_messages.push( user_message )
