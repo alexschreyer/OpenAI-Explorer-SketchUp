@@ -219,7 +219,7 @@ module AS_Extensions
                                }
                              ] }
                              
-                        prompt = prompt + "<br /><img src='data:image/png;base64,#{base64_image}' class='thumbnail' />"
+                        prompt = prompt + "<br /><img src='data:image/png;base64,#{base64_image}' class='thumbnail' title='Submitted view' />"
                     end
                     
                     js = "add_prompt(#{prompt.dump})"
@@ -250,6 +250,10 @@ module AS_Extensions
                     end
                     response_body = JSON.parse(res.body)
                     
+                    # Output the raw response for troubleshooting
+                    puts "\nRaw Response ============\n"
+                    puts response_body
+                    
                     # Add the response to the array of messages
                     @ai_messages.push( response_body["choices"][0]["message"] )
 
@@ -271,8 +275,8 @@ module AS_Extensions
                     # Double-check for a destructive request
                     badwords = ['delete','remove','erase','kill','expunge']
                     isbad = badwords.any? { |w| prompt.downcase.include? w }
-                    if isbad then             
-                        delete_check = UI.messagebox "You are asking to delete something. Are you sure you want to execute the generated code?", MB_YESNO
+                    if ( settings[5].to_s == "Yes" && isbad ) then             
+                        delete_check = UI.messagebox "You seem to be asking to delete something. Are you sure you want to execute the generated code?", MB_YESNO
                     else           
                         delete_check = 6
                     end
@@ -282,14 +286,14 @@ module AS_Extensions
 
                         # Life is always better with some feedback while SketchUp works
                         Sketchup.status_text = toolname + " | Executing code"         
-                        
-                        info += " | Code was executed."
 
                         # Extract the generated code
                         if generated_response.include? "```"     # For quoted code
                             generated_code = generated_response[/```ruby(.*?)```/m, 1].strip! 
+                            info += " | Code was executed."
                         else
-                            generated_code = generated_response
+                            generated_code = ''   # generated_response   previously for older models that did not quote
+                            info += " | No usable code in the response."
                         end
                         
                         # Execute it
@@ -335,13 +339,15 @@ module AS_Extensions
                 # Display result and stats in the dialog
                 if generated_response!=nil
                     # Clean up output a bit
-                    generated_response.gsub!( /\*\*([\w\s]+)\*\*/ , "<b>#{$1}</b>" )
+                    generated_response.gsub!( /\*\*(.*)\*\*/ ) { "<b>#{$1}</b>" }
+                    generated_response.gsub!( /\*(.*)\*/ ) { "<i>#{$1}</i>" }
                     generated_response.gsub!( /\`\`\`[^\s]+\n/, "<code>" )
                     generated_response.gsub!( /\`\`\`\n/, "</code>" )
+                    # generated_response.gsub!( /\`(.*)\`/ ) { "<code>#{$1}</code>" }                 
                     generated_response.gsub!( /```/, "" )
                     js = "add_response(#{generated_response.dump},#{info.dump})"
                 else
-                    js = "add_response('That did not work. See note below...',#{info.dump})"
+                    js = "add_response('That did not work. See error below...',#{info.dump})"
                 end
                 
                 dialog.execute_script(js)                

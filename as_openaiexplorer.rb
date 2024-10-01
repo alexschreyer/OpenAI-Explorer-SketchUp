@@ -61,6 +61,11 @@ History:        1.0 (3/18/2023):
                 - Better response handling
                 - Dialog now always opens centered
                 - Dialog now includes thumbnail if it was submitted with the prompt.
+                2.5 ():
+                - Fix for HTML rendering of output (b,i,code)
+                - Changed thumbnail appearance a bit
+                - Fixed 'no code' error
+                
                 
 
 =end
