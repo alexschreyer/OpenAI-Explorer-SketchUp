@@ -21,7 +21,7 @@ module AS_Extensions
     # Set up some module-wide defaults
     @default_settings = [ 
       "Generate only valid, self-contained SketchUp Ruby code without any method definitions.",  # System Message
-      "gpt-3.5-turbo",  # Chat Completion Model
+      "gpt-4o-mini",  # Chat Completion Model
       "256",  # Max. Tokens
       "0.1",  # Temperature
       "Enter your API key here",  # OpenAI API key
@@ -343,7 +343,8 @@ module AS_Extensions
                     generated_response.gsub!( /\*(.*)\*/ ) { "<i>#{$1}</i>" }
                     generated_response.gsub!( /\`\`\`[^\s]+\n/, "<code>" )
                     generated_response.gsub!( /\`\`\`\n/, "</code>" )
-                    # generated_response.gsub!( /\`(.*)\`/ ) { "<code>#{$1}</code>" }                 
+                    generated_response.gsub!( /##+(.*)?/ ) { "<h2>#{$1}</h2>" }     # Possible confusion with code comments
+                    # generated_response.gsub!( /\`(.*)\`/ ) { "<span class='icode'>#{$1}</span>" }                 
                     generated_response.gsub!( /```/, "" )
                     js = "add_response(#{generated_response.dump},#{info.dump})"
                 else
@@ -396,28 +397,6 @@ module AS_Extensions
     # ==================      
 
 
-    def self.show_openai_api
-    # Open the OpenAI settings page that has the API Key
-
-      UI.openURL('https://platform.openai.com/account/api-keys')
-
-    end # show_openai_api   
-    
-    
-    # ==================      
-
-
-    def self.show_openai_tou
-    # Open the OpenAI settings page that has the API Key
-
-      UI.openURL('https://openai.com/policies/terms-of-use')
-
-    end # show_openai_tou       
-    
-    
-    # ==================      
-
-
     def self.reset_settings
     # Resets all extension settings to their defaults
     
@@ -446,9 +425,11 @@ module AS_Extensions
       menu = UI.menu("Plugins").add_submenu( @exttitle )
       menu.add_item("OpenAI Explorer Dialog") { self.openai_explorer_dialog }
       menu.add_item("OpenAI Explorer Settings") { self.openai_explorer_settings }
-      menu.add_item("Get OpenAI API Key") { self.show_openai_api }
-      menu.add_separator      
-      menu.add_item("OpenAI Terms of Use") { self.show_openai_tou }
+      menu.add_separator       
+      menu.add_item("Check OpenAI Usage") { UI.openURL('https://platform.openai.com/usage') }
+      menu.add_item("Get OpenAI API Key") { UI.openURL('https://platform.openai.com/account/api-keys') }
+      menu.add_item("OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
+      menu.add_separator 
       menu.add_item("Reset extension settings") { self.reset_settings }
       menu.add_item("Help") { self.show_help }
 
