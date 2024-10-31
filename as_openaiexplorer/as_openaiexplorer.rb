@@ -123,6 +123,52 @@ module AS_Extensions
     # ==================
     
     
+    def self.openai_explorer_change_settings(use_case)
+    # Changes settings based on use case
+
+        # Get the current settings
+        settings = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )
+        
+        # Adjust some settings for use cases
+        if (use_case == 'chat') then
+        
+            settings[0] = 'Respond within the context of SketchUp.'     # System message
+            settings[5] = "No"   # Execute code
+            settings[6] = "No"   # Submit model view with request
+            
+        elsif (use_case == 'chat_vision') then
+        
+            settings[0] = 'Respond within the context of the SketchUp model shown in the image.'     # System message
+            settings[5] = "No"   # Execute code
+            settings[6] = "Yes"  # Submit model view with request
+            
+        elsif (use_case == 'ruby_code') then
+        
+            settings[0] = 'Generate valid SketchUp Ruby code.'     # System message
+            settings[5] = "No"   # Execute code
+            settings[6] = "No"   # Submit model view with request
+            
+        elsif (use_case == 'execute_ruby') then
+        
+            settings[0] = 'Generate only valid, brief and self-contained SketchUp Ruby code without any methods.'     # System message
+            settings[5] = "Yes"   # Execute code
+            settings[6] = "No"    # Submit model view with request    
+            
+        else
+        
+            # Do nothing
+          
+        end
+        
+        # Set the modified settings
+        Sketchup.write_default( @extname , "openai_explorer_settings" , settings.map { |s| s.gsub( '"' , '' ) } )  # Fix for inch pref saving error
+    
+    end # openai_explorer_change_settings    
+    
+    
+    # ==================    
+    
+    
     def self.openai_explorer_dialog
     # Opens a connection to the OpenAI API and executes what comes back - uses web dialog
     
@@ -172,7 +218,12 @@ module AS_Extensions
             # Callback to show settings dialog
             dialog.add_action_callback("settings_dlg") { |action_context|
                 self.openai_explorer_settings
-            }            
+            }     
+            
+            # Callback to change settings
+            dialog.add_action_callback("change_settings") { |action_context,use_case|
+                self.openai_explorer_change_settings(use_case)
+            }              
             
             # Callback to submit prompt and get response
             dialog.add_action_callback("submit_prompt") { |action_context,ui_prompt|
@@ -297,7 +348,7 @@ module AS_Extensions
                         end
                         
                         # Execute it
-                        eval generated_code
+                        eval( generated_code, TOPLEVEL_BINDING )
 
                     else
 
@@ -394,7 +445,19 @@ module AS_Extensions
     end # show_help    
     
     
-    # ==================      
+    # ==================     
+    
+
+    def self.show_openai_api
+    # Open the OpenAI settings page that has the API Key
+    # Need it this way for initial open
+
+      UI.openURL('https://platform.openai.com/api-keys')
+
+    end # show_openai_api   
+
+
+    # ==================       
 
 
     def self.reset_settings
@@ -427,7 +490,7 @@ module AS_Extensions
       menu.add_item("OpenAI Explorer Settings") { self.openai_explorer_settings }
       menu.add_separator       
       menu.add_item("Check OpenAI Usage") { UI.openURL('https://platform.openai.com/usage') }
-      menu.add_item("Get OpenAI API Key") { UI.openURL('https://platform.openai.com/account/api-keys') }
+      menu.add_item("Get OpenAI API Key") { self.show_openai_api }
       menu.add_item("OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
       menu.add_separator 
       menu.add_item("Reset extension settings") { self.reset_settings }

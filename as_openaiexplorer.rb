@@ -15,7 +15,7 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          OpenAIExplorer (Experimental)
 
-Version:        2.5
+Version:        2.6
 
 Date :          10/1/2024
 
@@ -68,6 +68,10 @@ History:        1.0 (3/18/2023):
                 - Made thumbnail appearance stretchable
                 - Fixed 'no code available' error
                 - Code cleanup
+                2.6 (TBD):
+                - Added use case selector to dialog (to speed things up)
+                - Fix for initial API Key link error
+                - Now executes code under toplevel binding in case we get methods
                 
                 
 

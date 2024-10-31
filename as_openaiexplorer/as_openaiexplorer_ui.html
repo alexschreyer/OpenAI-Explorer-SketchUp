@@ -15,8 +15,9 @@
             legend {font-weight:bold; margin:0; padding:5px 0 0 0;}
             a, a:hover, a:visited {text-decoration:underline; font-size:inherit; color:#4d5259;}
             a:hover {text-decoration:none;}
-            input, textarea {color:#363545; background-color:#f3f2f7; border:none; border-bottom:1px solid #363545; padding:5px 10px}
+            input, textarea, select {color:#363545; background-color:#f3f2f7; border:none; border-bottom:1px solid #363545; padding:5px 10px}
             input[type=submit], input[type=button] { border:2px solid #005f9e; padding:5px 10px; font-weight:bold;}
+            select { border:2px solid #005f9e; padding: 4px 10px; width: 40vw; }
             .solid { color:#f9f9fb; background-color:#005f9e; }
             .border-only { color:#005f9e; background-color: #f3f2f7; }            
             .solid:hover, .border-only:hover { color:#f9f9fb; background-color:#005187; }
@@ -44,7 +45,8 @@
       <div id="output"></div>
         <form id="OpenAISubmit" name="OpenAISubmit" onsubmit="return false;">      
           <p><input type="text" id="prompt" name="prompt" style="width:calc(100% - 70px);" placeholder="Ask the AI anything" x-webkit-speech />&nbsp;&nbsp;<input type="submit" id="submit" class="solid" value="Go" style="float:right;" /></p>   
-          <p><input type="button" id="settings" value="Settings" style="font-weight:bold;" class="border-only" />
+          <p><select name="use_case" id="use_case" title="Changes setting to match use case. Leave unselected if there is no change."><option value="" selected disabled>Change use case to...</option><option value="chat">Chat</option><option value="chat_vision">Chat (include screenshot)</option><option value="ruby_code">Generate Ruby code</option><option value="execute_ruby">Manipulate SketchUp (using Ruby)</option></select>
+          <input type="button" id="settings" value="Settings" style="font-weight:bold;margin-left:0.5em;" class="border-only" />
           <input type="button" id="cancel" class="border-only" value="Cancel" style="font-weight:bold;margin-left:0.5em;" /></p>
         </form>
         <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a></p>
@@ -83,6 +85,12 @@
               prompt = jQuery('#prompt').val();
               sketchup.submit_prompt(prompt);
               
+        });
+        
+        // Change the setting presets
+        jQuery("#use_case").change(function() {
+          var selectedValue = jQuery(this).val(); 
+          sketchup.change_settings( selectedValue );
         });
           
         // Close the dialog  
