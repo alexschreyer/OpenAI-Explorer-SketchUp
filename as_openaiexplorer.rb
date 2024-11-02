@@ -69,9 +69,10 @@ History:        1.0 (3/18/2023):
                 - Fixed 'no code available' error
                 - Code cleanup
                 2.6 (TBD):
-                - Added use case selector to dialog (to speed things up)
+                - Added use case selector to main dialog (to speed things up)
                 - Fix for initial API Key link error
                 - Now executes code under toplevel binding in case we get methods
+                - Fix for text rendering in output
                 
                 
 

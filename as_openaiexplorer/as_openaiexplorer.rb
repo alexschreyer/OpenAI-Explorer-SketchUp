@@ -389,17 +389,41 @@ module AS_Extensions
  
                 # Display result and stats in the dialog
                 if generated_response!=nil
-                    # Clean up output a bit
-                    generated_response.gsub!( /\*\*(.*)\*\*/ ) { "<b>#{$1}</b>" }
-                    generated_response.gsub!( /\*(.*)\*/ ) { "<i>#{$1}</i>" }
-                    generated_response.gsub!( /\`\`\`[^\s]+\n/, "<code>" )
-                    generated_response.gsub!( /\`\`\`\n/, "</code>" )
-                    generated_response.gsub!( /##+(.*)?/ ) { "<h2>#{$1}</h2>" }     # Possible confusion with code comments
-                    # generated_response.gsub!( /\`(.*)\`/ ) { "<span class='icode'>#{$1}</span>" }                 
-                    generated_response.gsub!( /```/, "" )
+                
+                    # Clean up output:
+                    # Replace code tags first
+                    generated_response.gsub!( /\`\`\`[^\s]+/, "<code>" )
+                    generated_response.gsub!( /\`\`\`/, "</code>" )
+
+                    # Protect code content and then replace all other tags
+                    # Not elegant but it'll do
+                    code_blocks = []
+                    generated_response.gsub!(/<code>(.*?)<\/code>/m) do |match|
+                      code_blocks << match
+                      'ASDASDASDASDASDASDASDASD'
+                    end
+
+                    generated_response.gsub!( /\*\*(.*?)\*\*/ ) { "<b>#{$1}</b>" }
+                    generated_response.gsub!( /\*(.*?)\*/ ) { "<i>#{$1}</i>" }
+                    generated_response.gsub!( /####\s(.*)?/ ) { "<h4>#{$1}</h4>" }                       
+                    generated_response.gsub!( /###\s(.*)?/ ) { "<h3>#{$1}</h3>" }                    
+                    generated_response.gsub!( /##\s(.*)?/ ) { "<h2>#{$1}</h2>" }                    
+                    generated_response.gsub!( /#\s(.*)?/ ) { "<h1>#{$1}</h1>" }
+                    generated_response.gsub!( /\`(.*?)\`/ ) { "<span class='icode'>#{$1}</span>" } 
+                    
+                    # Now bring code blocks back in
+                    i = -1
+                    generated_response.gsub!( /ASDASDASDASDASDASDASDASD/ ) do |match|
+                      i += 1
+                      code_blocks[i].strip
+                    end
+                    
                     js = "add_response(#{generated_response.dump},#{info.dump})"
+                    
                 else
+                
                     js = "add_response('That did not work. See error below...',#{info.dump})"
+                    
                 end
                 
                 dialog.execute_script(js)                

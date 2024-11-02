@@ -8,8 +8,10 @@
         <style>
             * {font-family: "Open Sans", Arial, Helvetica, sans-serif; font-size:13px!important;}
             body {background-color:#f3f2f7; padding:5px 5px; min-width:220px;}
-            h1, label, p {color:#363545;}
+            label, p {color:#363545;}
+            h1 { margin: 0; font-size: 1.4em!important; }
             h2 { margin: 0; font-size: 1.2em!important; }
+            h3, h4 { margin: 0; font-size: 1.1em!important; }
             b, i { font-size: inherit!important; }
             fieldset {color:#363545; background-color:#f9f9fb; padding:10px; border:none;}
             legend {font-weight:bold; margin:0; padding:5px 0 0 0;}
@@ -17,11 +19,11 @@
             a:hover {text-decoration:none;}
             input, textarea, select {color:#363545; background-color:#f3f2f7; border:none; border-bottom:1px solid #363545; padding:5px 10px}
             input[type=submit], input[type=button] { border:2px solid #005f9e; padding:5px 10px; font-weight:bold;}
-            select { border:2px solid #005f9e; padding: 4px 10px; width: 40vw; }
+            select { border:2px solid #005f9e; padding: 4px 10px; width: 35vw; }
             .solid { color:#f9f9fb; background-color:#005f9e; }
             .border-only { color:#005f9e; background-color: #f3f2f7; }            
             .solid:hover, .border-only:hover { color:#f9f9fb; background-color:#005187; }
-            .icode { font-family: monospace; }
+            .icode { font-family: monospace; background-color: #dcedf9; color:#363545; padding: 1px 2px; }
             label { display:block; width: 146px; float:left; }
             /* Output element */
             #output { width:calc(100% - 10px); height:calc(100vh - 150px); display:block; overflow:auto; background-color:#fff; padding:5px; }
@@ -45,7 +47,7 @@
       <div id="output"></div>
         <form id="OpenAISubmit" name="OpenAISubmit" onsubmit="return false;">      
           <p><input type="text" id="prompt" name="prompt" style="width:calc(100% - 70px);" placeholder="Ask the AI anything" x-webkit-speech />&nbsp;&nbsp;<input type="submit" id="submit" class="solid" value="Go" style="float:right;" /></p>   
-          <p><select name="use_case" id="use_case" title="Changes setting to match use case. Leave unselected if there is no change."><option value="" selected disabled>Change use case to...</option><option value="chat">Chat</option><option value="chat_vision">Chat (include screenshot)</option><option value="ruby_code">Generate Ruby code</option><option value="execute_ruby">Manipulate SketchUp (using Ruby)</option></select>
+          <p><select name="use_case" id="use_case" title="Changes setting to match use case. Leave unselected if there is no change."><option value="" selected disabled>Adjust settings to...</option><option value="chat">Chat</option><option value="chat_vision">Chat (include screenshot)</option><option value="ruby_code">Generate Ruby code</option><option value="execute_ruby">Manipulate SketchUp (using Ruby)</option></select>
           <input type="button" id="settings" value="Settings" style="font-weight:bold;margin-left:0.5em;" class="border-only" />
           <input type="button" id="cancel" class="border-only" value="Cancel" style="font-weight:bold;margin-left:0.5em;" /></p>
         </form>
@@ -66,7 +68,7 @@
         // Function to output the prompt (and add a loading animation)
         function add_prompt(prompt) {
         
-              jQuery('#output').append("<div class='prompt'>" + prompt.replace(/\n/g, '<br />') + "</div>");
+              jQuery('#output').append("<div class='prompt copy'>" + prompt.replace(/\n/g, '<br />') + "</div>");
               jQuery('#output').append("<div class='response temp'><div class='typing'><span></span><span></span><span></span></div> &nbsp;</div>");
               jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
               
@@ -103,9 +105,11 @@
             sketchup.settings_dlg();
         });        
         
-        // Select the prompt on startup
-        jQuery(document).ready(function() {                
+        jQuery(document).ready(function() {      
+
+            // Select the prompt on startup
             jQuery('#prompt').select();
+
         });
         
     </script>
