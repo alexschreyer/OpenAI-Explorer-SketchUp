@@ -352,7 +352,7 @@ module AS_Extensions
 
                     else
 
-                        nocode = "No code was executed. You can turn this feature on in the extension's settings."
+                        nocode = "No code was executed."
                         info += " | " + nocode
                         puts nocode
 
@@ -405,10 +405,10 @@ module AS_Extensions
 
                     generated_response.gsub!( /\*\*(.*?)\*\*/ ) { "<b>#{$1}</b>" }
                     generated_response.gsub!( /\*(.*?)\*/ ) { "<i>#{$1}</i>" }
-                    generated_response.gsub!( /####\s(.*)?/ ) { "<h4>#{$1}</h4>" }                       
-                    generated_response.gsub!( /###\s(.*)?/ ) { "<h3>#{$1}</h3>" }                    
-                    generated_response.gsub!( /##\s(.*)?/ ) { "<h2>#{$1}</h2>" }                    
-                    generated_response.gsub!( /#\s(.*)?/ ) { "<h1>#{$1}</h1>" }
+                    generated_response.gsub!( /####\s(.*)?\n/ ) { "<h4>#{$1}</h4>" }
+                    generated_response.gsub!( /###\s(.*)?\n/ ) { "<h3>#{$1}</h3>" } 
+                    generated_response.gsub!( /##\s(.*)?\n/ ) { "<h2>#{$1}</h2>" }   
+                    generated_response.gsub!( /#\s(.*)?\n/ ) { "<h1>#{$1}</h1>" }
                     generated_response.gsub!( /\`(.*?)\`/ ) { "<span class='icode'>#{$1}</span>" } 
                     
                     # Now bring code blocks back in
@@ -417,6 +417,7 @@ module AS_Extensions
                       i += 1
                       code_blocks[i].strip
                     end
+                    generated_response.gsub!( /\n\n\n/ ) { "\n\n" }
                     
                     js = "add_response(#{generated_response.dump},#{info.dump})"
                     

@@ -17,7 +17,7 @@ Name :          OpenAIExplorer (Experimental)
 
 Version:        2.6
 
-Date :          10/1/2024
+Date :          11/2/2024
 
 Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
 
@@ -68,10 +68,10 @@ History:        1.0 (3/18/2023):
                 - Made thumbnail appearance stretchable
                 - Fixed 'no code available' error
                 - Code cleanup
-                2.6 (TBD):
+                2.6 (11/2/2024):
                 - Added use case selector to main dialog (to speed things up)
                 - Fix for initial API Key link error
-                - Now executes code under toplevel binding in case we get methods
+                - Now executes code under toplevel binding in case the code includes methods
                 - Fix for text rendering in output
                 
                 
@@ -93,7 +93,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "2.5"
+    @extversion           = "2.6"
     @exttitle             = "OpenAI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
