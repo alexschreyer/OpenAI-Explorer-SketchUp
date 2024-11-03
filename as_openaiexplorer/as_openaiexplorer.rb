@@ -3,11 +3,12 @@
 # ==================
 
 
-require 'sketchup.rb'
+require 'sketchup'
 require 'net/http'
 require 'uri'
 require 'json'
 require 'base64'
+require 'stringio'
 
 
 # ==================
@@ -67,34 +68,27 @@ module AS_Extensions
     # ==================        
     
     
-    def self.show_disclaimer
-    # Shows a disclaimer window once
-    
-        default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
-        if default.to_s != "yes" then        
+    def self.show_disclaimer_window
+    # Shows a license and disclaimer window
         
-            # Show a window with my terms of use
-            f = File.join( __dir__ , "license.txt" )
-            title = @exttitle + " | Terms of Use"
-            if Sketchup.version.to_f < 17 then   # Use old dialog
-              @dlg = UI::WebDialog.new( title , true ,
-                title.gsub(/\s+/, "_") , 600 , 700 , 100 , 100 , true);
-              @dlg.navigation_buttons_enabled = false
-              @dlg.set_file( f )
-              @dlg.show_modal      
-            else   #Use new dialog
-              @dlg = UI::HtmlDialog.new( { :dialog_title => title, :width => 600, :height => 700,
-                :style => UI::HtmlDialog::STYLE_UTILITY, :preferences_key => title.gsub(/\s+/, "_") } )
-              @dlg.set_file( f )
-              @dlg.show_modal
-              @dlg.center
-            end          
+        # Show a window with my terms of use
+        f = File.join( __dir__ , "license.txt" )
+        title = @exttitle + " | Terms of Use"
+        if Sketchup.version.to_f < 17 then   # Use old dialog
+          @dlg = UI::WebDialog.new( title , true ,
+            title.gsub(/\s+/, "_") , 600 , 700 , 100 , 100 , true);
+          @dlg.navigation_buttons_enabled = false
+          @dlg.set_file( f )
+          @dlg.show_modal      
+        else   #Use new dialog
+          @dlg = UI::HtmlDialog.new( { :dialog_title => title, :width => 600, :height => 700,
+            :style => UI::HtmlDialog::STYLE_UTILITY, :preferences_key => title.gsub(/\s+/, "_") } )
+          @dlg.set_file( f )
+          @dlg.show_modal
+          @dlg.center
+        end          
 
-            Sketchup.write_default( @extname , "disclaimer_acknowledged" , "yes" )
-            
-        end 
-
-    end # show_disclaimer
+    end # show_disclaimer_window
 
 
     # ==================
@@ -106,7 +100,11 @@ module AS_Extensions
         toolname = "OpenAI Explorer (Experimental) Settings"
         
         # Show disclaimer once
-        self.show_disclaimer
+        default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
+        if default.to_s != "yes" then 
+            self.show_disclaimer_window 
+            Sketchup.write_default( @extname , "disclaimer_acknowledged" , "yes" )
+        end 
         
         # Get all the parameters from input dialog
         prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: ", "Submit model view with request: ", "Model view submission quality: ", "Submit # of prompts: " ]
@@ -175,7 +173,11 @@ module AS_Extensions
         toolname = "OpenAI Explorer (Experimental)"
         
         # Show disclaimer once
-        self.show_disclaimer        
+        default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
+        if default.to_s != "yes" then 
+            self.show_disclaimer_window 
+            Sketchup.write_default( @extname , "disclaimer_acknowledged" , "yes" )
+        end       
         
         # Get the settings, including the API key
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )     
@@ -223,7 +225,12 @@ module AS_Extensions
             # Callback to change settings
             dialog.add_action_callback("change_settings") { |action_context,use_case|
                 self.openai_explorer_change_settings(use_case)
-            }              
+            }   
+            
+            # Callback to show disclaimer dialog
+            dialog.add_action_callback("disclaimer_dlg") { |action_context|
+                self.show_disclaimer_window
+            }  
             
             # Callback to submit prompt and get response
             dialog.add_action_callback("submit_prompt") { |action_context,ui_prompt|
@@ -240,6 +247,9 @@ module AS_Extensions
 
                     # Start a new undo group
                     mod.start_operation("OpenAI Experiment")
+                    
+                    # Reset this variable
+                    ruby_result = ''
 
                     # Life is always better with some feedback while SketchUp works
                     Sketchup.status_text = toolname + " | Starting request"
@@ -342,13 +352,22 @@ module AS_Extensions
                         if generated_response.include? "```"     # For quoted code
                             generated_code = generated_response[/```ruby(.*?)```/m, 1].strip! 
                             info += " | Code was executed."
+                        elsif generated_response.include? "<code>"     # For HTML tags
+                            generated_code = generated_response[/\<code\>(.*?)\<\/code\>/m, 1].strip! 
+                            info += " | Code was executed."
                         else
                             generated_code = ''   # generated_response   previously for older models that did not quote
                             info += " | No usable code in the response."
                         end
                         
-                        # Execute it
-                        eval( generated_code, TOPLEVEL_BINDING )
+                        # Execute it and capture any output
+                        old_stdout = $stdout
+                        $stdout = StringIO.new
+                        
+                        ruby_result = eval( generated_code, TOPLEVEL_BINDING )
+                        
+                        ruby_result = $stdout.string
+                        $stdout = old_stdout
 
                     else
 
@@ -376,7 +395,10 @@ module AS_Extensions
                     # Provide an error message for SketchUp errors
                     errmsg += "<b>(SketchUp:)</b> #{e}. "
 
-                    puts "This request generated an error. See dialog for details.\n"                
+                    puts "This request generated an error. See dialog for details.\n"        
+                    
+                    # Reset the output in any case
+                    $stdout = old_stdout if old_stdout
 
                 end    
                 
@@ -418,6 +440,10 @@ module AS_Extensions
                       code_blocks[i].strip
                     end
                     generated_response.gsub!( /\n\n\n/ ) { "\n\n" }
+                    
+                    if ruby_result != ''
+                        generated_response += "\n<h2>Result (from Ruby):</h2><br><code>#{ruby_result.to_s}</code>"
+                    end
                     
                     js = "add_response(#{generated_response.dump},#{info.dump})"
                     
@@ -518,8 +544,9 @@ module AS_Extensions
       menu.add_item("Get OpenAI API Key") { self.show_openai_api }
       menu.add_item("OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
       menu.add_separator 
+      menu.add_item("Help") { self.show_help }      
+      menu.add_item("Terms of Use") { self.show_disclaimer_window }
       menu.add_item("Reset extension settings") { self.reset_settings }
-      menu.add_item("Help") { self.show_help }
 
       # Let Ruby know we have loaded this file
       file_loaded(__FILE__)

@@ -1,12 +1,21 @@
 IMPORTANT! PLEASE READ:
+=======================
+
 This is an experimental extension, which is able to fully automate SketchUp using its Ruby scripting engine. This can even affect your entire file system because SketchUp has unrestricted, user level access to that. Use with caution and at your own risk! When in doubt, do not enable code execution in the extension’s settings.
 
-BY INSTALLING, ACCESSING OR USING THIS SOFTWARE, YOU (THE USER) AGREE TO BE BOUND BY THE TERMS AND CONDITIONS AS PROVIDED BELOW.
+Any AI generated content may contain errors, fabrications, or may not be usable at all. Use any generated content at your own discretion.
+
+BY INSTALLING, ACCESSING OR USING THIS SOFTWARE, YOU (THE USER) AGREE TO BE BOUND BY THE TERMS AND CONDITIONS AS PROVIDED HERE.
 
 LICENSE:
+========
+
 This is free software, provided under the GPL license (https://www.gnu.org/licenses/gpl-3.0.html).
 (c) Alexander Schreyer, alexschreyer.net
 
 DISCLAIMER:
+===========
+
 THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR ANY COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
+
 WHERE APPLICABLE, THIRD-PARTY MATERIALS AND THIRD-PARTY PLATFORMS ARE PROVIDED 'AS IS' AND THE USER OF THIS SOFTWARE ASSUMES ALL RISK AND LIABILITY REGARDING ANY USE OF (OR RESULTS OBTAINED THROUGH) THIRD-PARTY MATERIALS OR THIRD-PARTY PLATFORMS.

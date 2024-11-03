@@ -73,6 +73,9 @@ History:        1.0 (3/18/2023):
                 - Fix for initial API Key link error
                 - Now executes code under toplevel binding in case the code includes methods
                 - Fix for text rendering in output
+                2.7 ():
+                - Added feature to capture and show Ruby output
+                - Adjusted TOU and added TOU link
                 
                 
 
