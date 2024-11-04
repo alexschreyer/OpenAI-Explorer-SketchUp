@@ -21,15 +21,15 @@ module AS_Extensions
   
     # Set up some module-wide defaults
     @default_settings = [ 
-      "Generate only valid, self-contained SketchUp Ruby code without any method definitions.",  # System Message
+      "Respond within the context of SketchUp.",  # System Message
       "gpt-4o-mini",  # Chat Completion Model
-      "256",  # Max. Tokens
+      "1024",  # Max. Tokens
       "0.1",  # Temperature
       "Enter your API key here",  # OpenAI API key
       "No",  # Execute code
       "No",  # Submit model view with request
       "low",  # Model view submission quality
-      "1"  # Number of submitted messages (user and assistant)
+      "3"  # Number of submitted messages (user and assistant)
     ]
     
     
@@ -439,7 +439,10 @@ module AS_Extensions
                       i += 1
                       code_blocks[i].strip
                     end
+                    
                     generated_response.gsub!( /\n\n\n/ ) { "\n\n" }
+                    generated_response.gsub!( /\<code\>\n/ ) { "<code>" }
+                    generated_response.gsub!( /\<\/code\>\n/ ) { "</code>" }
                     
                     if ruby_result != ''
                         generated_response += "\n<h2>Result (from Ruby):</h2><br><code>#{ruby_result.to_s}</code>"

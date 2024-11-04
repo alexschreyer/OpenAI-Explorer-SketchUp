@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          OpenAIExplorer (Experimental)
 
-Version:        2.6
+Version:        2.7
 
-Date :          11/2/2024
+Date :          11/4/2024
 
 Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
 
@@ -73,9 +73,11 @@ History:        1.0 (3/18/2023):
                 - Fix for initial API Key link error
                 - Now executes code under toplevel binding in case the code includes methods
                 - Fix for text rendering in output
-                2.7 ():
-                - Added feature to capture and show Ruby output
-                - Adjusted TOU and added TOU link
+                2.7 (11/4/2024):
+                - Added feature to capture and show Ruby output (e.g. for lists)
+                - Adjusted TOU and added TOU link to dialog
+                - Adjusted defaults (extension starts in chat mode)
+                - Minor fixes
                 
                 
 
@@ -96,7 +98,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "2.6"
+    @extversion           = "2.7"
     @exttitle             = "OpenAI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     

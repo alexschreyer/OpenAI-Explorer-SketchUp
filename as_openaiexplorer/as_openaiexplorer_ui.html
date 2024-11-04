@@ -1,17 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>OpenAI Explorer Dialog</title>
+        <title>OpenAI Explorer (Experimental) Dialog</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-        <!-- Use compatibility mode in IE to allow for newer features -->
-        <meta http-equiv="x-ua-compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
             * {font-family: "Open Sans", Arial, Helvetica, sans-serif; font-size:13px!important;}
             body {background-color:#f3f2f7; padding:5px 5px; min-width:220px;}
             label, p {color:#363545;}
-            h1 { margin: 0.2em 0; font-size: 1.4em!important; }
-            h2 { margin: 0.2em 0; font-size: 1.2em!important; }
-            h3, h4 { margin: 0.2em 0; font-size: 1.1em!important; }
+            h1 { font-size: 1.4em!important; }
+            h2 { font-size: 1.2em!important; }
+            h3, h4 { font-size: 1.1em!important; }
             b, i { font-size: inherit!important; }
             fieldset {color:#363545; background-color:#f9f9fb; padding:10px; border:none;}
             legend {font-weight:bold; margin:0; padding:5px 0 0 0;}
@@ -37,7 +36,7 @@
             .typing span { content: ""; -webkit-animation: blink 1.5s infinite; animation: blink 1.5s infinite; -webkit-animation-fill-mode: both; animation-fill-mode: both; height: 8px;  width: 8px; background: #fff; position: absolute; left: 0; top: 5px; border-radius: 50%; }
             .typing span:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; margin-left: 15px; } 
             .typing span:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; margin-left: 30px; }
-            code { font-family: monospace; font-size: 1em; display: block; padding: 1em; background-color:#dcedf9; color:#363545; border-radius:10px; }
+            code, pre { font-family: monospace; font-size: 1em; display: block; padding: 1em; background-color:#dcedf9; color:#363545; border-radius:10px; }
             @-webkit-keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
             @keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
         </style>
@@ -51,7 +50,7 @@
           <input type="button" id="settings" value="Settings" style="font-weight:bold;margin-left:0.5em;" class="border-only" />
           <input type="button" id="cancel" class="border-only" value="Cancel" style="font-weight:bold;margin-left:0.5em;" /></p>
         </form>
-        <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a> | <a href="" onclick="javascript:sketchup.disclaimer_dlg()" title="Show the Terms of Use window">Terms of Use</a></p>
+        <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a> | <a href="javascript:sketchup.disclaimer_dlg();" title="Show the Terms of Use window">Terms of Use</a></p>
         <script>     
         
         // Function to remove the temp box and output the response
