@@ -1,17 +1,14 @@
 # OpenAI Explorer Extension for SketchUp
- 
 
-Copyright 2023, Alexander C. Schreyer
+Copyright 2023-2024, Alexander C. Schreyer
 All rights reserved
 
-THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR ANY COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
+Terms and Conditions: https://alexschreyer.net/projects/openai-explorer-experimental/#extension-terms-and-conditions
 
-WHERE APPLICABLE, THIRD-PARTY MATERIALS AND THIRD-PARTY PLATFORMS ARE PROVIDED 'AS IS' AND THE USER OF THIS SOFTWARE ASSUMES ALL RISK AND LIABILITY REGARDING ANY USE OF (OR RESULTS OBTAINED THROUGH) THIRD-PARTY MATERIALS OR THIRD-PARTY PLATFORMS.
+License:              GPL (https://www.gnu.org/licenses/gpl-3.0.html)
 
-License:        GPL (https://www.gnu.org/licenses/gpl-3.0.html)
+Author :              Alexander Schreyer, alexschreyer.net
 
-Author :        Alexander Schreyer, alexschreyer.net
+Website:              https://alexschreyer.net/projects/openai-explorer-experimental/
 
-Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
-
-Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
+Description :         Use OpenAI's services to create or manipulate geometry, write Ruby code, or analyze SketchUp models, all using natural language
