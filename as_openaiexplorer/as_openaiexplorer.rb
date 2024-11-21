@@ -543,9 +543,9 @@ module AS_Extensions
       menu.add_item("OpenAI Explorer Dialog") { self.openai_explorer_dialog }
       menu.add_item("OpenAI Explorer Settings") { self.openai_explorer_settings }
       menu.add_separator       
-      menu.add_item("Check OpenAI Usage") { UI.openURL('https://platform.openai.com/usage') }
+      menu.add_item("Check OpenAI API Usage") { UI.openURL('https://platform.openai.com/usage') }
       menu.add_item("Get OpenAI API Key") { self.show_openai_api }
-      menu.add_item("OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
+      menu.add_item("View OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
       menu.add_separator 
       menu.add_item("Help") { self.show_help }      
       menu.add_item("Terms of Use") { self.show_disclaimer_window }
