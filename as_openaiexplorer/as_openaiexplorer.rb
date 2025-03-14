@@ -25,11 +25,12 @@ module AS_Extensions
       "gpt-4o-mini",  # Chat Completion Model
       "1024",  # Max. Tokens
       "0.1",  # Temperature
-      "Enter your API key here",  # OpenAI API key
+      "Enter your API key here",  # OpenAI/Google/... API key
       "No",  # Execute code
       "No",  # Submit model view with request
       "low",  # Model view submission quality
-      "3"  # Number of submitted messages (user and assistant)
+      "3",  # Number of submitted messages (user and assistant)
+      "https://api.openai.com/v1/chat/completions"  # Service provider endpoint
     ]
     
     
@@ -97,7 +98,7 @@ module AS_Extensions
     def self.openai_explorer_settings
     # Settings dialog
 
-        toolname = "OpenAI Explorer (Experimental) Settings"
+        toolname = @exttitle + " | Settings"
         
         # Show disclaimer once
         default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
@@ -107,8 +108,8 @@ module AS_Extensions
         end 
         
         # Get all the parameters from input dialog
-        prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [1 to 2048 or 4096]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: ", "Submit model view with request: ", "Model view submission quality: ", "Submit # of prompts: " ]
-        lists = [ "" , "" , "" , "" , "" , "Yes|No", "Yes|No", "low|high", "1|3|5|9" ]
+        prompts = [ "System Message: " , "Chat Completion Model: " , "Max. Tokens [positive integer]: ", "Temperature [0 to 2.0]: ", "API Key: ", "Execute code: ", "Submit model view with request: ", "Model view submission quality: ", "Submit # of prompts: ", "AI Service API endpoint: " ]
+        lists = [ "" , "" , "" , "" , "" , "Yes|No", "Yes|No", "low|high", "1|3|5|9", "" ]
         defaults = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )
         settings = UI.inputbox( prompts , defaults , lists , toolname )
         return if !settings
@@ -170,7 +171,7 @@ module AS_Extensions
     def self.openai_explorer_dialog
     # Opens a connection to the OpenAI API and executes what comes back - uses web dialog
     
-        toolname = "OpenAI Explorer (Experimental)"
+        toolname = @exttitle
         
         # Show disclaimer once
         default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
@@ -183,7 +184,7 @@ module AS_Extensions
         settings = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )     
         
         # Provide a reminder for the API Key when it doesn't have the correct length
-        if settings[4].length < 50 then
+        if settings[4].length < 30 then
         
             UI.messagebox("You must enter an OpenAI API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.")
             self.show_openai_api
@@ -237,7 +238,7 @@ module AS_Extensions
 
                 begin
 
-                    mod = Sketchup.active_model # Open model
+                    mod = Sketchup.active_model # Currently open model
                     
                     # Get the settings - in case anything changed
                     settings = Sketchup.read_default( @extname , "openai_explorer_settings" , @default_settings )        
@@ -246,7 +247,7 @@ module AS_Extensions
                     t1 = Time.now
 
                     # Start a new undo group
-                    mod.start_operation("OpenAI Experiment")
+                    mod.start_operation("AI Experiment")
                     
                     # Reset this variable
                     ruby_result = ''
@@ -255,8 +256,11 @@ module AS_Extensions
                     Sketchup.status_text = toolname + " | Starting request"
                     info = ""
 
-                    # Set the endpoint and API key for the OpenAI API
-                    endpoint = "https://api.openai.com/v1/chat/completions"                
+                    # Set the endpoint and API key for the OpenAI/Google/... API
+                    unless settings[9].to_s.include?('https://')
+                      raise "AI API endpoint does not look like a valid URL. Please correct before trying again."
+                    end
+                    endpoint = settings[9].to_s
                     api_key = settings[4].to_s
 
                     # Define the prompt for the code completion
@@ -305,13 +309,15 @@ module AS_Extensions
                       # "stop" => "\n"
                     })      
 
-                    # Make the HTTP request to the OpenAI API and parse the response
+                    # Make the HTTP request to the OpenAI/Google/... API and parse the response
                     res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, read_timeout: 30) do |http|
                       http.request(req)
                     end
                     response_body = JSON.parse(res.body)
                     
                     # Output the raw response for troubleshooting
+                    puts "\nRaw Request ============\n"
+                    puts req.body
                     puts "\nRaw Response ============\n"
                     puts response_body
                     
@@ -387,9 +393,9 @@ module AS_Extensions
                  
                     errmsg = ""
                      
-                    # Provide an error message for OpenAI errors if they get returned
+                    # Provide an error message for OpenAI/Google errors if they get returned
                     if ( defined?(response_body['error']['message']) != nil ) then
-                        errmsg += "<b>(OpenAI:)</b> #{response_body['error']['message']} "
+                        errmsg += "<b>(AI Service:)</b> #{response_body['error']['message']} "
                     end                     
 
                     # Provide an error message for SketchUp errors
@@ -503,7 +509,7 @@ module AS_Extensions
     
 
     def self.show_openai_api
-    # Open the OpenAI settings page that has the API Key
+    # Open the OpenAI settings pages that have the API Keys
     # Need it this way for initial open
 
       UI.openURL('https://platform.openai.com/api-keys')
@@ -540,13 +546,19 @@ module AS_Extensions
 
       # Add to the SketchUp Extensions menu
       menu = UI.menu("Plugins").add_submenu( @exttitle )
-      menu.add_item("OpenAI Explorer Dialog") { self.openai_explorer_dialog }
-      menu.add_item("OpenAI Explorer Settings") { self.openai_explorer_settings }
+      menu.add_item("AI Explorer Dialog") { self.openai_explorer_dialog }
+      menu.add_item("AI Explorer Settings") { self.openai_explorer_settings }
       menu.add_separator       
+      menu.add_item("Get OpenAI API Key") { UI.openURL('https://platform.openai.com/api-keys') }      
       menu.add_item("Check OpenAI API Usage") { UI.openURL('https://platform.openai.com/usage') }
-      menu.add_item("Get OpenAI API Key") { self.show_openai_api }
       menu.add_item("View OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
       menu.add_separator 
+      menu.add_item("Get Google API Key") { UI.openURL('https://aistudio.google.com/apikey') }  
+      menu.add_item("Google API Compatibility") { UI.openURL('https://ai.google.dev/gemini-api/docs/openai#rest') }       
+      menu.add_separator       
+      menu.add_item("Get Anthropic API Key") { UI.openURL('https://console.anthropic.com/settings/keys') }  
+      menu.add_item("Anthropic API Compatibility") { UI.openURL('https://docs.anthropic.com/en/api/openai-sdk') }       
+      menu.add_separator       
       menu.add_item("Help") { self.show_help }      
       menu.add_item("Terms of Use") { self.show_disclaimer_window }
       menu.add_item("Reset extension settings") { self.reset_settings }

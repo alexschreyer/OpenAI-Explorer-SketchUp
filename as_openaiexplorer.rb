@@ -1,6 +1,6 @@
 =begin
 
-Copyright 2023-2024, Alexander C. Schreyer
+Copyright 2023-2025, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR ANY COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
@@ -13,13 +13,13 @@ Author :        Alexander Schreyer, www.alexschreyer.net, mail@alexschreyer.net
 
 Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
-Name :          OpenAIExplorer (Experimental)
+Name :          AI Explorer (Experimental)
 
-Version:        2.8
+Version:        3.0
 
-Date :          11/21/2024
+Date :          3/13/2025
 
-Description :   An experimental extension to use OpenAI’s services to create or manipulate geometry in SketchUp using natural language.
+Description :   An experimental extension to use OpenAI’s (or Google's / Anthropic's) services to create or manipulate geometry in SketchUp using natural language.
 
 History:        1.0 (3/18/2023):
                 - first version
@@ -80,6 +80,9 @@ History:        1.0 (3/18/2023):
                 - Minor fixes
                 2.8 (11/21/2024):
                 - Minor edits
+                3.0 (3/13/2025):
+                - Renamed to AI Explorer (Experimental)
+                - Added option to use other OpenAI-compatible services (using the OpenAI API standards), e.g. Google or Anthropic via their endpoints.
                 
                 
 
@@ -100,8 +103,8 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "2.8"
-    @exttitle             = "OpenAI Explorer (Experimental)"
+    @extversion           = "3.0"
+    @exttitle             = "AI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
     @extdir = File.dirname(__FILE__)
@@ -113,7 +116,7 @@ module AS_Extensions
     extension.copyright   = "Copyright 2023-#{Time.now.year} Alexander C. Schreyer"
     extension.creator     = "Alexander C. Schreyer, www.alexschreyer.net"
     extension.version     = @extversion
-    extension.description = "An experimental tool to query the OpenAI API using natural language and then execute the resulting code in SketchUp (to create or manipulate geometry)."
+    extension.description = "Use AI services (OpenAI/Google/...) to create or manipulate geometry, write Ruby code, or analyze SketchUp models, all using natural language"
     
     Sketchup.register_extension( extension , true )
          
