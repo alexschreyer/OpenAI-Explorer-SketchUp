@@ -50,7 +50,7 @@
           <input type="button" id="settings" value="Settings" style="font-weight:bold;margin-left:0.5em;" class="border-only" />
           <input type="button" id="cancel" class="border-only" value="Cancel" style="font-weight:bold;margin-left:0.5em;" /></p>
         </form>
-        <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a> | <a href="javascript:sketchup.disclaimer_dlg();" title="Show the Terms of Use window">Terms of Use</a></p>
+        <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a> | <a href="javascript:sketchup.help_dlg();" title="Show the Help window">Help</a> | <a href="javascript:sketchup.disclaimer_dlg();" title="Show the Terms of Use window">Terms of Use</a></p>
         <script>     
         
         // Function to remove the temp box and output the response
@@ -102,7 +102,7 @@
         // Show the settings dialog
         jQuery('#settings').click(function(){
             sketchup.settings_dlg();
-        });        
+        });               
         
         jQuery(document).ready(function() {      
 

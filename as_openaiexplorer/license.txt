@@ -1,7 +1,7 @@
-OpenAI Explorer (Experimental) Extension for SketchUp
+AI Explorer (Experimental) Extension for SketchUp
 =====================================================
 
-Use OpenAI's services to create or manipulate geometry, write Ruby code, or analyze SketchUp models, all using natural language
+An experimental extension to use OpenAI’s (or Google's / Anthropic's) services to create or manipulate geometry in SketchUp using natural language.
 
 IMPORTANT! PLEASE NOTE:
 =======================
@@ -10,7 +10,7 @@ This is an experimental extension, which is able to fully automate SketchUp usin
 
 Any AI generated content may contain errors, fabrications, or may not be usable at all. Use any generated content at your own discretion. Therefore, use this tool with caution and experiment with prompts if you run into errors. Sometimes it helps to simply re-word the prompt.
 
-This extension is not affiliated with or endorsed by OpenAI.
+This extension is not affiliated with or endorsed by OpenAI or any of the other AI services.
 
 BY INSTALLING, ACCESSING OR USING THIS SOFTWARE, YOU (THE USER) AGREE TO BE BOUND BY THE TERMS AND CONDITIONS AS PROVIDED HERE.
 

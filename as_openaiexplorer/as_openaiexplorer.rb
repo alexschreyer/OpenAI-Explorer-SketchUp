@@ -22,7 +22,7 @@ module AS_Extensions
     # Set up some module-wide defaults
     @default_settings = [ 
       "Respond within the context of SketchUp.",  # System Message
-      "gpt-4o-mini",  # Chat Completion Model
+      "gpt-4.1-mini",  # Chat Completion Model
       "1024",  # Max. Tokens
       "0.1",  # Temperature
       "Enter your API key here",  # OpenAI/Google/... API key
@@ -74,20 +74,26 @@ module AS_Extensions
         
         # Show a window with my terms of use
         f = File.join( __dir__ , "license.txt" )
-        title = @exttitle + " | Terms of Use"
-        if Sketchup.version.to_f < 17 then   # Use old dialog
-          @dlg = UI::WebDialog.new( title , true ,
-            title.gsub(/\s+/, "_") , 600 , 700 , 100 , 100 , true);
-          @dlg.navigation_buttons_enabled = false
-          @dlg.set_file( f )
-          @dlg.show_modal      
-        else   #Use new dialog
-          @dlg = UI::HtmlDialog.new( { :dialog_title => title, :width => 600, :height => 700,
-            :style => UI::HtmlDialog::STYLE_UTILITY, :preferences_key => title.gsub(/\s+/, "_") } )
-          @dlg.set_file( f )
-          @dlg.show_modal
-          @dlg.center
-        end          
+        dlg_f = File.join( __dir__ , "license_dlg.html" )
+        disclaimer = File.read(f)
+        title = @exttitle + " | Readme & Terms of Use"
+        
+        dlg = UI::HtmlDialog.new( { :dialog_title => title, :width => 600, :height => 700, top: 100, left: 100,
+          :style => UI::HtmlDialog::STYLE_UTILITY, :preferences_key => title.gsub(/\s+/, "_") } )
+        dlg.set_file( dlg_f )
+                
+        dlg.add_action_callback("license_accepted") do |action_context|
+          Sketchup.write_default( @extname , "disclaimer_acknowledged" , "yes" )
+          dlg.close
+        end  
+        
+        dlg.add_action_callback("load_license") do |action_context|        
+          js = "document.getElementById('tou-text').textContent = " + disclaimer.dump
+          dlg.execute_script(js)   
+        end     
+        
+        dlg.show_modal
+        dlg.center    
 
     end # show_disclaimer_window
 
@@ -104,7 +110,6 @@ module AS_Extensions
         default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
         if default.to_s != "yes" then 
             self.show_disclaimer_window 
-            Sketchup.write_default( @extname , "disclaimer_acknowledged" , "yes" )
         end 
         
         # Get all the parameters from input dialog
@@ -186,7 +191,7 @@ module AS_Extensions
         # Provide a reminder for the API Key when it doesn't have the correct length
         if settings[4].length < 30 then
         
-            UI.messagebox("You must enter an OpenAI API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.")
+            UI.messagebox("You must enter an OpenAI API Key before you can use this tool. A website will open next where you can obtain one. Once you have it, enter it in the settings dialog for this tool.\n\nPlease note: If you don't already have an OpenAI account, then you will need to create one.")
             self.show_openai_api
             self.openai_explorer_settings
             
@@ -233,6 +238,11 @@ module AS_Extensions
                 self.show_disclaimer_window
             }  
             
+            # Callback to show help dialog
+            dialog.add_action_callback("help_dlg") { |action_context|
+                self.show_help
+            }
+            
             # Callback to submit prompt and get response
             dialog.add_action_callback("submit_prompt") { |action_context,ui_prompt|
 
@@ -267,6 +277,7 @@ module AS_Extensions
                     prompt = ui_prompt.to_s
                     sys_prompt = settings[0].to_s
                     sys_prompt += " Do not generate any code that affects the file system." if ( settings[5].to_s == "Yes" )
+                    puts "\n#{@exttitle} - RAW OUTPUT:\n"
                     puts "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                     
                     # Set up default user mesage (only prompt, no image)

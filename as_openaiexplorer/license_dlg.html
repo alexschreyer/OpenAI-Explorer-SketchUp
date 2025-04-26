@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TOU Loader</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: "Open Sans", Arial, Helvetica, sans-serif;
+      background-color: #f3f2f7;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+
+    .top-section {
+      flex: 8.5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .top-section textarea {
+      width: 100%;
+      height: 100%;
+      resize: none;
+      padding: 1rem;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+      overflow: auto;
+    }
+
+    .bottom-section {
+      flex: 1.5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 1.5rem;
+    }
+
+    .bottom-section button {
+      padding: 0.75rem 2rem;
+      font-size: 1rem;
+      background-color: #005187;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .bottom-section button:hover {
+      background-color: #217cbb;
+    }
+
+    @media (max-width: 600px) {
+      .top-section, .bottom-section {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+  <script>
+    window.onload = function() {
+      sketchup.load_license();
+    };
+  </script>
+</head>
+<body>
+  <div class="container">
+    <div class="top-section">
+      <textarea id="tou-text" placeholder="Loading..." readonly></textarea>
+    </div>
+    <div class="bottom-section" onClick='sketchup.license_accepted();'>
+      <button id="accept-btn">I Accept</button>
+    </div>
+  </div>
+</body>
+</html>

@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          AI Explorer (Experimental)
 
-Version:        3.0
+Version:        3.0.1
 
-Date :          3/13/2025
+Date :          4/26/2025
 
 Description :   An experimental extension to use OpenAI’s (or Google's / Anthropic's) services to create or manipulate geometry in SketchUp using natural language.
 
@@ -83,6 +83,12 @@ History:        1.0 (3/18/2023):
                 3.0 (3/13/2025):
                 - Renamed to AI Explorer (Experimental)
                 - Added option to use other OpenAI-compatible services (using the OpenAI API standards), e.g. Google or Anthropic via their endpoints.
+                3.0.1 (4/26/2025):
+                - Added Help link to main dialog
+                - Cleared up purpose of raw output in console
+                - Added a better TOU dialog design
+                - Changed default model to gpt-4.1-mini
+                
                 
                 
 
@@ -103,7 +109,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "3.0"
+    @extversion           = "3.0.1"
     @exttitle             = "AI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
