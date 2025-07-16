@@ -1,116 +1,403 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-bs-theme="light">
     <head>
-        <title>OpenAI Explorer (Experimental) Dialog</title>
+        <title>AI Explorer (Experimental) Dialog</title>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <!-- Bootstrap CSS -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+        <link href="https://cdn.jsdelivr.net/npm/@trimble-oss/modus-bootstrap@2.0.10/dist/css/modus-bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/darcula.min.css" integrity="sha512-kqCOYFDdyQF4JM8RddA6rMBi9oaLdR0aEACdB95Xl1EgaBhaXMIe8T4uxmPitfq4qRmHqo+nBU2d1l+M4zUx1g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <style>
-            * {font-family: "Open Sans", Arial, Helvetica, sans-serif; font-size:13px!important;}
-            body {background-color:#f3f2f7; padding:5px 5px; min-width:220px;}
-            label, p {color:#363545;}
-            h1 { font-size: 1.4em!important; }
-            h2 { font-size: 1.2em!important; }
-            h3, h4 { font-size: 1.1em!important; }
-            b, i { font-size: inherit!important; }
-            fieldset {color:#363545; background-color:#f9f9fb; padding:10px; border:none;}
-            legend {font-weight:bold; margin:0; padding:5px 0 0 0;}
-            a, a:hover, a:visited {text-decoration:underline; font-size:inherit; color:#4d5259;}
-            a:hover {text-decoration:none;}
-            input, textarea, select {color:#363545; background-color:#f3f2f7; border:none; border-bottom:1px solid #363545; padding:5px 10px}
-            input[type=submit], input[type=button] { border:2px solid #005f9e; padding:5px 10px; font-weight:bold;}
-            select { border:2px solid #005f9e; padding: 4px 10px; width: 35vw; }
-            .solid { color:#f9f9fb; background-color:#005f9e; }
-            .border-only { color:#005f9e; background-color: #f3f2f7; }            
-            .solid:hover, .border-only:hover { color:#f9f9fb; background-color:#005187; }
-            .icode { font-family: monospace; background-color: #dcedf9; color:#363545; padding: 1px 2px; }
-            label { display:block; width: 146px; float:left; }
-            /* Output element */
-            #output { width:calc(100% - 10px); height:calc(100vh - 150px); display:block; overflow:auto; background-color:#fff; padding:5px; }
-            .prompt { background-color:#dcedf9; margin:5px; padding:5px 10px; width:80%; border-radius:10px; clear:both; float:left; overflow:hidden; }
-            .thumbnail { width:40vw; height:auto; margin:10px; float:right; }
-            .response { background-color:#005f9e; color:#fff; margin:5px; padding:10px; width:80%; border-radius:10px; clear:both; float:right; overflow:hidden; }
-            .error, .error strong { font-size: inherit; background-color:#fff5e4; }
-            .details { font-size: 0.9em; margin:0; padding:0 10px; width:80%; clear:both; float:right; text-align:right; }
+            body { min-width: 220px; }
+            .icode { font-family: monospace; padding: 1px 2px; }
+            #output { height: calc(100vh - 165px); overflow: auto; }
+            .prompt { color: #222; background-color: #fff; margin: 0.5em; padding: 0.5em 1em; width: 80%; border-radius: 1em 1em 1em 0; float: left; clear: both; }
+            .response { color: #eee; background-color: #0063a3; margin: 0.5em; padding: 0.5em 1em; width: 80%; border-radius: 1em 1em 0 1em; float: right; clear: both; }
+            .response p, .response pre { margin-bottom:0.5em; }
+            .response code { color: #222; background-color: #dcedf9; padding: 0.1em 0.2em;}
+            .thumbnail { width: 30vw; height: auto; margin: 10px; float: right; }
+            .file_ref { font-size: 0.9em; font-style: italic; margin: 10px; float: right; }
+            .details { font-size: 0.9em; margin: 0; padding: 0 10px; width: 80%; clear: both; float: right; text-align: right; }
+            .CodeMirror { border-radius: 5px; height: inherit; margin: 1em 0; }
             /* Typing animation */
             .typing { position: relative; }
-            .typing span { content: ""; -webkit-animation: blink 1.5s infinite; animation: blink 1.5s infinite; -webkit-animation-fill-mode: both; animation-fill-mode: both; height: 8px;  width: 8px; background: #fff; position: absolute; left: 0; top: 5px; border-radius: 50%; }
-            .typing span:nth-child(2) { -webkit-animation-delay: 0.2s; animation-delay: 0.2s; margin-left: 15px; } 
-            .typing span:nth-child(3) { -webkit-animation-delay: 0.4s; animation-delay: 0.4s; margin-left: 30px; }
-            code, pre { font-family: monospace; font-size: 1em; display: block; padding: 1em; background-color:#dcedf9; color:#363545; border-radius:10px; }
-            @-webkit-keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
+            .typing span { content: ""; animation: blink 1.5s infinite both; height: 8px; width: 8px; background: #fff; position: absolute; left: 0; top: 5px; border-radius: 50%; }
+            .typing span:nth-child(2) { animation-delay: 0.2s; margin-left: 15px; }
+            .typing span:nth-child(3) { animation-delay: 0.4s; margin-left: 30px; }
             @keyframes blink { 0% { opacity: 0.1; } 20% { opacity: 1; } 100% { opacity: 0.1; } }
         </style>
-        <script src="src/jquery-3.7.0.min.js"></script>
     </head>
-    <body>
-      <div id="output"></div>
-        <form id="OpenAISubmit" name="OpenAISubmit" onsubmit="return false;">      
-          <p><input type="text" id="prompt" name="prompt" style="width:calc(100% - 70px);" placeholder="Ask the AI anything" x-webkit-speech />&nbsp;&nbsp;<input type="submit" id="submit" class="solid" value="Go" style="float:right;" /></p>   
-          <p><select name="use_case" id="use_case" title="Changes setting to match use case. Leave unselected if there is no change."><option value="" selected disabled>Adjust settings to...</option><option value="chat">Chat</option><option value="chat_vision">Chat (include screenshot)</option><option value="ruby_code">Generate Ruby code</option><option value="execute_ruby">Manipulate SketchUp (using Ruby)</option></select>
-          <input type="button" id="settings" value="Settings" style="font-weight:bold;margin-left:0.5em;" class="border-only" />
-          <input type="button" id="cancel" class="border-only" value="Cancel" style="font-weight:bold;margin-left:0.5em;" /></p>
-        </form>
-        <p style="float:right;margin:0;font-size:0.9em;">Extension by <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a> | <a href="javascript:sketchup.help_dlg();" title="Show the Help window">Help</a> | <a href="javascript:sketchup.disclaimer_dlg();" title="Show the Terms of Use window">Terms of Use</a></p>
-        <script>     
+    <body class="p-3">
+        <div id="output" class="border rounded bg-secondary-subtle p-2 mb-3"></div>
         
-        // Function to remove the temp box and output the response
-        function add_response(resp,info) {
-        
-            jQuery('.temp').remove();
-            jQuery('#output').append("<div class='response'>" + resp.replace(/\n/g, '<br />') + "</div>");
-            jQuery('#output').append("<div class='details'>" + info + "</div>");
-            jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
-            jQuery('#prompt').select();
+        <form id="AISubmit" name="AISubmit" onsubmit="return false;">
+            <div class="row g-2 mb-3">
+                <div class="input-group col">
+                    <input type="text" id="prompt" name="prompt" class="form-control color-primary" placeholder="Ask the AI anything" x-webkit-speech style="border-color: var(--bs-primary);" autocomplete="off">
+                    <!-- File toggle button -->
+                    <button type="button" id="attachFile" class="btn btn-outline-primary px-3" data-bs-toggle="button" title="Attach a file">
+                        <i class="fas fa-paperclip"></i>
+                    </button>
+                    <!-- Hidden input for file name -->
+                    <input type="hidden" id="attachFileName" name="attachFileName" value="">
+                </div>
+                <div class="col-auto">
+                    <!-- Submit button -->
+                    <button type="submit" id="submit" class="btn btn-primary" title="Submit the prompt">
+                        <i class="fas fa-paper-plane"></i> Go
+                    </button>
+                </div>
+            </div>
             
-        };           
-        
-        // Function to output the prompt (and add a loading animation)
-        function add_prompt(prompt) {
-        
-              jQuery('#output').append("<div class='prompt copy'>" + prompt.replace(/\n/g, '<br />') + "</div>");
-              jQuery('#output').append("<div class='response temp'><div class='typing'><span></span><span></span><span></span></div> &nbsp;</div>");
-              jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
-              
-        };             
+            <div class="row g-2 mb-3">
+                <div class="col input-group">
+                    <button type="button" id="clear" class="btn btn-outline-primary" title="New chat">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                    <select name="use_case" id="use_case" class="form-select text-primary" title="Select use case" style="border-color: var(--bs-primary);">
+                        <option value="" selected disabled>Adjust use case to...</option>
+                        <option value="chat">Chat about SketchUp</option>
+                        <option value="chat_vision">Chat (include model view)</option>
+                        <option value="ruby_code">Generate Ruby code</option>
+                        <option value="execute_ruby">Manipulate SketchUp (using Ruby)</option>
+                        <option value="custom">Custom settings</option>
+                    </select>
+                    <button type="button" id="options" class="btn btn-outline-primary" title="Adjust settings">
+                        <i class="fas fa-cog"></i> Options
+                    </button>                 
+                </div>
+                <div class="col-auto">
+                    <button type="button" id="cancel" class="btn btn-outline-primary" title="Close dialog">
+                        <i class="fas fa-times"></i> Close
+                    </button>
+                </div>
+            </div>
+        </form>
 
-        // Submit the prompt to SU
-        jQuery("#OpenAISubmit").submit(function(event){
-        
-              event.preventDefault();
+        <p class="text-end small mb-0">
+            Extension by <a href="https://alexschreyer.net/projects/sketchup-extensions/" title="Visit alexschreyer.net" target="_blank">Alex Schreyer</a> | 
+            <a href="javascript:sketchup.help_dlg();" title="Show the Help window">Help &amp; About</a> | 
+            <a href="javascript:sketchup.disclaimer_dlg();" title="Show the Terms of Use window">Terms of Use</a>
+        </p>
 
-              if (jQuery('#prompt').val().length == 0) {
-                  alert('You must enter a prompt.');
-                  return false;
-              }
-              
-              prompt = jQuery('#prompt').val();
-              sketchup.submit_prompt(prompt);
-              
-        });
-        
-        // Change the setting presets
-        jQuery("#use_case").change(function() {
-          var selectedValue = jQuery(this).val(); 
-          sketchup.change_settings( selectedValue );
-        });
-          
-        // Close the dialog  
-        jQuery('#cancel').click(function(){
-            sketchup.close_dlg();
-        });
-        
-        // Show the settings dialog
-        jQuery('#settings').click(function(){
-            sketchup.settings_dlg();
-        });               
-        
-        jQuery(document).ready(function() {      
+        <!-- Offcanvas settings dialog -->
+        <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasOptions" aria-labelledby="offcanvasOptionsLabel">
+            <div class="offcanvas-header">
+                <h5 class="offcanvas-title" id="offcanvasOptionsLabel">Options</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <h3>Extension:</h3>
+                <div class="mb-3">
+                    <label for="colorMode" class="form-label">Color Mode</label>
+                    <select id="colorMode" class="form-select">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="user">User Preference</option>
+                    </select>
+                </div>
+                <h3>AI Service:</h3>
+                <div class="mb-3">
+                  <label for="system-message" class="form-label">System Message</label>
+                  <textarea class="form-control" id="system-message" rows="2" placeholder="Enter a system message">Generate only valid SketchUp Ruby code.</textarea>
+                </div>      
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="execute-code">
+                    <label class="form-check-label" for="execute-code">Execute code</label>
+                </div>
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="submit-model-view">
+                    <label class="form-check-label" for="submit-model-view">Submit model view with request</label>
+                </div>                          
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="use-function-calling" checked>
+                    <label class="form-check-label" for="use-function-calling">Use function calling</label>
+                </div>
+                <div class="mb-3">
+                    <label for="function-calling-json" class="form-label">Function Calling JSON</label>
+                    <div id="function-calling-json" style="height:120px;"></div>
+                    <div class="form-text m-1">Edit the JSON for function calling. This will call the respective SketchUp function if code execution is enabled.</div>
+                </div>                          
+                 <div class="mb-3">
+                  <label for="ai-model" class="form-label">AI Model</label>
+                  <input type="text" class="form-control" id="ai-model" placeholder="e.g., gpt-4" value="gpt-4.1-mini">
+                </div>      
+                <div class="mb-3">
+                  <label for="api-key" class="form-label">API Key</label>
+                  <input type="password" class="form-control" id="api-key" placeholder="Enter your API key" autocomplete="off">
+                    <div id="api-key-help" class="form-text m-1">
+                        You can get your API key here: 
+                        <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>, 
+                        <a href="https://aistudio.google.com/apikey" target="_blank">Google</a>,
+                        <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic</a>,
+                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
+                    </div>   
+                </div>    
+                <div class="mb-3">
+                  <label for="ai-endpoint" class="form-label">AI Endpoint URL</label>
+                  <input type="text" class="form-control" id="ai-endpoint" placeholder="https://api.example.com/chat/completions" value="https://api.openai.com/v1/chat/completions">
+                    <div id="api-endpoint-help" class="form-text m-1">
+                        You can find endpoint URLs 
+                        <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">on this page</a>.
+                    </div>                  
+                </div>
+                <div class="mb-3">
+                  <label for="temperature" class="form-label">Temperature</label>
+                  <input type="number" class="form-control" id="temperature" value="0.2" step="0.1" min="0" max="1">
+                </div>
+                <div class="mb-3">
+                  <label for="max-tokens" class="form-label">Max. Tokens</label>
+                  <input type="number" class="form-control" id="max-tokens" value="1000" min="1">
+                </div>
+                <div class="mb-3">
+                    <label for="model-view-quality" class="form-label">Model view submission quality</label>
+                    <select class="form-select" id="model-view-quality">
+                        <option value="low" selected>Low</option>
+                        <option value="high">High</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label for="num-prompts" class="form-label">Submit # of prompts</label>
+                    <select class="form-select" id="num-prompts">
+                        <option value="1">1</option>
+                        <option value="3" selected>3</option>
+                        <option value="5">5</option>
+                        <option value="7">7</option>
+                        <option value="9">9</option>
+                    </select>
+                </div>  
+                              
+            </div>
+        </div>
 
-            // Select the prompt on startup
-            jQuery('#prompt').select();
-
-        });
+        <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/ruby/ruby.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
+        <script src="src/jquery-3.7.0.min.js"></script>
         
-    </script>
+        <script>     
+            // Gather all settings into a JSON object
+            function write_settings() {
+
+                const settings = {
+                    colorMode: $('#colorMode').val(),
+                    systemMessage: $('#system-message').val(),
+                    executeCode: $('#execute-code').is(':checked'),
+                    submitModelView: $('#submit-model-view').is(':checked'),
+                    aiModel: $('#ai-model').val(),
+                    apiKey: $('#api-key').val(),
+                    aiEndpoint: $('#ai-endpoint').val(),
+                    temperature: parseFloat($('#temperature').val()),
+                    maxTokens: parseInt($('#max-tokens').val(), 10),
+                    modelViewQuality: $('#model-view-quality').val(),
+                    numPrompts: $('#num-prompts').val(),
+                    useCase: $('#use_case').val(),
+                    useFunctionCalling: $('#use-function-calling').is(':checked'),
+                    functionCallingJson: functionCallingEditor.getValue()
+                };
+
+                // console.log("Settings to write:", settings);
+                sketchup.write_settings(settings);
+            }
+
+            // Set all settings from a JSON object
+            function apply_settings(settings) {
+
+                // console.log("Settings to apply:", settings);
+
+                if (settings.colorMode !== undefined) $('#colorMode').val(settings.colorMode).trigger('change');
+                if (settings.systemMessage !== undefined) $('#system-message').val(settings.systemMessage);
+                if (settings.executeCode !== undefined) $('#execute-code').prop('checked', settings.executeCode);
+                if (settings.submitModelView !== undefined) $('#submit-model-view').prop('checked', settings.submitModelView);
+                if (settings.aiModel !== undefined) $('#ai-model').val(settings.aiModel);
+                if (settings.apiKey !== undefined) $('#api-key').val(settings.apiKey);
+                if (settings.aiEndpoint !== undefined) $('#ai-endpoint').val(settings.aiEndpoint);
+                if (settings.temperature !== undefined) $('#temperature').val(settings.temperature);
+                if (settings.maxTokens !== undefined) $('#max-tokens').val(settings.maxTokens);
+                if (settings.modelViewQuality !== undefined) $('#model-view-quality').val(settings.modelViewQuality);
+                if (settings.numPrompts !== undefined) $('#num-prompts').val(settings.numPrompts);
+                if (settings.useCase !== undefined) $('#use_case').val(settings.useCase);
+                if (settings.useFunctionCalling !== undefined) $('#use-function-calling').prop('checked', settings.useFunctionCalling).trigger('change');
+                if (settings.functionCallingJson !== undefined) {
+                    functionCallingEditor.setValue(settings.functionCallingJson);
+                }
+            }     
+            
+            // Apply the dialog color mode using jQuery
+            function applyColorMode(mode) {
+                const $htmlElement = $('html');
+                if (mode === 'light') {
+                $htmlElement.attr('data-bs-theme', 'light');
+                } else if (mode === 'dark') {
+                $htmlElement.attr('data-bs-theme', 'dark');
+                } else {
+                // Auto mode: Use system preferences
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                $htmlElement.attr('data-bs-theme', prefersDark ? 'dark' : 'light');
+                }
+            }         
+            
+            jQuery(document).ready(function() {    
+                // Load the settings
+                sketchup.read_settings();
+                // Get the system messages
+                sketchup.get_system_msgs();
+                // Select the prompt on startup
+                jQuery('#prompt').select();
+                // Set up tooltips
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+            });            
+        
+            // Function to remove the temp box and output the response
+            function add_response(resp,info) {
+                jQuery('.temp').remove();
+                jQuery('#output').append("<div class='response'>" + resp.trimEnd() + "</div>");
+                jQuery('#output').append("<div class='details small'>" + info + "</div>");
+                // Convert <code> that is not contained in a <p> or <li> tag to a CodeMirror editor
+                // jQuery('.response:last code:not(p code, li code)').each(function() {
+                jQuery('.response:last pre:not(p pre, li pre)').each(function() {
+                    const codeBlock = this; // Reference to the current <code> block
+
+                    // Create a CodeMirror instance for the <code> block
+                    const editor = CodeMirror(function(elt) {
+                        // Replace the <code> block with the CodeMirror editor
+                        codeBlock.parentNode.replaceChild(elt, codeBlock);
+                    }, {
+                        value: jQuery(codeBlock).text(), // Get the text content of the <code> block
+                        mode: 'ruby', 
+                        theme: "darcula",
+                        lineNumbers: true,
+                        lineWrapping: true,
+                        readOnly: true,
+                    });
+                });
+                jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
+                jQuery('#prompt').select();
+            };           
+            
+            // Function to output the prompt (and add a loading animation)
+            function add_prompt(prompt) {
+                jQuery('#output').append("<div class='prompt copy'>" + prompt.replace(/\n/g, '<br />') + "</div>");
+                jQuery('#output').append("<div class='response temp'><div class='typing'><span></span><span></span><span></span></div> &nbsp;</div>");
+                jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
+            };             
+
+            // Submit the prompt to SU
+            jQuery("#AISubmit").submit(function(event){
+                event.preventDefault();
+                if (jQuery('#prompt').val().length == 0) {
+                    alert('You must enter a prompt.');
+                    return false;
+                };
+                prompt = jQuery('#prompt').val();
+                sketchup.submit_prompt(prompt);
+            });
+        
+            // Change the use case presets
+            jQuery("#use_case").change(function() {
+                var selectedValue = jQuery(this).val();
+
+                // Adjust settings based on use case
+                if (selectedValue === 'chat') {
+                    $('#system-message').val(systemMsgs.chat);
+                    $('#execute-code').prop('checked', false);
+                    $('#submit-model-view').prop('checked', false);
+                } else if (selectedValue === 'chat_vision') {
+                    $('#system-message').val(systemMsgs.chat_vision);
+                    $('#execute-code').prop('checked', false);
+                    $('#submit-model-view').prop('checked', true);
+                } else if (selectedValue === 'ruby_code') {
+                    $('#system-message').val(systemMsgs.ruby_code);
+                    $('#execute-code').prop('checked', false);
+                    $('#submit-model-view').prop('checked', false);
+                } else if (selectedValue === 'execute_ruby') {
+                    $('#system-message').val(systemMsgs.execute_ruby);
+                    $('#execute-code').prop('checked', true);
+                    $('#submit-model-view').prop('checked', false);
+                }
+                write_settings();
+            });
+
+            // Set use_case to "custom" when these are changed
+            $('#system-message, #execute-code, #submit-model-view').on('change input', function() {
+                $('#use_case').val('custom');
+                write_settings();
+            });
+
+            // Clear the output and start a new chat
+            jQuery('#clear').click(function(){
+                jQuery('#output').empty();
+                sketchup.clear_dlg();
+            });          
+            
+            // Close the dialog  
+            jQuery('#cancel').click(function(){
+                sketchup.close_dlg();
+            });
+            
+            // Get the file to attach 
+            jQuery('#attachFile').click(function(){
+                sketchup.get_file();
+            });            
+
+            // Open the offcanvas when the "Options" button is clicked
+            jQuery('#options').click(function () {
+                const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasOptions'));
+                offcanvas.show();
+            });
+
+            // Apply the selected color mode
+            jQuery('#colorMode').change(function () {
+                const selectedMode = jQuery(this).val();
+                localStorage.setItem('colorMode', selectedMode);   // TODO remove line later
+                applyColorMode(selectedMode);
+            });
+
+            // Send settings to SketchUp when the offcanvas is closed
+            jQuery('#offcanvasOptions').on('hidden.bs.offcanvas', function () {
+                write_settings();
+            });
+
+            // Initialize CodeMirror for function calling JSON
+            let functionCallingEditor = CodeMirror(document.getElementById('function-calling-json'), {
+                value: "\"tools\": [ ]",
+                mode: { name: "javascript", json: true },
+                theme: "darcula",
+                lineNumbers: true,
+                lineWrapping: true,
+                readOnly: false,
+                viewportMargin: Infinity,
+                tabSize: 2
+            });
+
+            // Enable/disable editor based on checkbox
+            $('#use-function-calling').on('change', function() {
+                const enabled = $(this).is(':checked');
+                $('#function-calling-json').prop('disabled', !enabled);
+                functionCallingEditor.setOption('readOnly', !enabled);
+                if (enabled) {
+                    functionCallingEditor.getWrapperElement().classList.remove('cm-disabled');
+                } else {
+                    functionCallingEditor.getWrapperElement().classList.add('cm-disabled');
+                }
+            });
+
+            // Add a disabled style for CodeMirror
+            $('<style>.cm-disabled .CodeMirror-scroll { background: #222 !important; opacity: 0.5; pointer-events: none; }</style>').appendTo('head');
+
+            // Load the saved color mode on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                const savedMode = localStorage.getItem('colorMode') || 'dark'; // Default to dark mode
+                document.getElementById('colorMode').value = savedMode;
+                applyColorMode(savedMode);
+            });    
+        
+        </script>
     </body>
 </html>
