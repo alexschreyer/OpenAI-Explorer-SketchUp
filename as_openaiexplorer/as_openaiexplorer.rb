@@ -33,7 +33,7 @@ module AS_Extensions
       "colorMode" => "dark",  # Color mode
       "useCase" => "chat",  # Use case
       "useFunctionCalling" => false,  # Use function calling
-      "functionCallingJson" => ""  # Function calling JSON
+      "functionCallingJson" => "[]"  # Function calling JSON
     }
     
     # Create an empty array for all AI messages
@@ -224,7 +224,7 @@ module AS_Extensions
 
         # Callback to get filename for attachment
         @dialog.add_action_callback("get_file") { |action_context| 
-            f = UI.openpanel("Select a PDF file to attach to your prompt", "", "PDF Files|*.pdf;||")
+            f = UI.openpanel("Select a PDF or Ruby file to attach to your prompt", "", "PDF Files;Ruby files|*.pdf;*.rb||")
             if !(f.nil? || f.empty?)
                 @ai_attachment = f.to_s.gsub("\\", "/")
                 fname = File.basename(f)
@@ -273,11 +273,13 @@ module AS_Extensions
                 prompt = ui_prompt.to_s
                 sys_prompt = settings["systemMessage"].to_s
                 sys_prompt += " Do not generate any Ruby code that operates on the local computer's file system." if ( settings["executeCode"] == true )
-                sys_prompt += " Format your response with HTML tags for the BODY section of a page (but exclude the BODY tag)."
+                sys_prompt += " Format your response with HTML tags for the BODY section of a page (but exclude the BODY tag). Enclose any Ruby code in <pre> tags."
+
+                # Add raw data to console output
                 puts "\n#{@exttitle} - RAW OUTPUT:\n"
                 puts "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                 
-                # Set up default user mesage (only prompt, no image)
+                # Set up user mesage (only prompt, no image)
                 user_message = {  
                                   "role" => "user", 
                                   "content" => [
@@ -300,20 +302,39 @@ module AS_Extensions
 
                 # Modify user message if we have an attachment
                 if ( @ai_attachment != "" )
-                    # Encode the file as Base64 
-                    base64_file = encoded_file(@ai_attachment)
-                    filename = File.basename(@ai_attachment)  
-                    user_message["content"].push(
-                            {   "type" => "file", 
-                                "file" =>  
-                                { "filename" => "#{filename}", 
-                                  "file_data" => "data:application/pdf;base64,#{base64_file}" }  
-                            })
+                    ext = File.extname(@ai_attachment)
+                    if ext.downcase == ".pdf"                    
+                        # Encode the file as Base64 
+                        base64_file = encoded_file(@ai_attachment)
+                        filename = File.basename(@ai_attachment)  
+                        user_message["content"].push(
+                                {   "type" => "file", 
+                                    "file" =>  
+                                    { "filename" => "#{filename}", 
+                                      "file_data" => "data:application/pdf;base64,#{base64_file}" }  
+                                })
+                    elsif ext.downcase == ".rb"
+                        rb_text = File.read(@ai_attachment)
+                        user_message["content"][0]["text"] += "\n\nConsider this Ruby code in your answer: ```ruby#{rb_text}```"  
+                    end
+                    # Add the attachment to the prompt
                     prompt = prompt + "<br /><p class='file_ref'><i class='fas fa-paperclip'></i> #{@ai_attachment}</p>"
+                end
+
+                # Add function calling JSON if desired
+                if settings["useFunctionCalling"] == true && settings["functionCallingJson"].to_s.strip != ""
+                  begin
+                    function_json = JSON.parse(settings["functionCallingJson"].to_s)
+                  rescue JSON::ParserError => e
+                    puts "Error parsing function calling JSON: #{e.message}"
+                    function_json = nil
+                  end
+                else
+                  function_json = nil
                 end
                 
                 js = "add_prompt(#{prompt.dump})"
-                @dialog.execute_script(js)  
+                @dialog.execute_script(js)
                 
                 # Add the request to the array of messages
                 @ai_messages.push( user_message )
@@ -323,7 +344,8 @@ module AS_Extensions
                 req = Net::HTTP::Post.new(uri)
                 req["Content-Type"] = "application/json"
                 req["Authorization"] = "Bearer #{api_key}"
-                req.body = JSON.dump({
+
+                body_hash = {
                   "model" => settings["aiModel"].to_s,
                   "messages" => [{ "role" => "system", "content" => "#{sys_prompt}" }] + @ai_messages.last( settings["numPrompts"].to_i ),
                   "max_tokens" => settings["maxTokens"].to_i,
@@ -332,7 +354,12 @@ module AS_Extensions
                   "temperature" => settings["temperature"].to_f,
                   "stream" => false
                   # "stop" => "\n"
-                })      
+                }
+
+                # Only add the tool code if executeCode is true
+                body_hash["tools"] = function_json if ( function_json and settings["executeCode"] )
+
+                req.body = JSON.dump(body_hash)
 
                 # Make the HTTP request to the OpenAI/Google/... API and parse the response
                 res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, read_timeout: 30) do |http|
@@ -340,7 +367,7 @@ module AS_Extensions
                 end
                 response_body = JSON.parse(res.body)
                 
-                # Output the raw response for troubleshooting
+                # Add raw response to console output
                 puts "\nRaw Request ============\n"
                 puts req.body
                 puts "\nRaw Response ============\n"
@@ -349,12 +376,8 @@ module AS_Extensions
                 # Add the response to the array of messages
                 @ai_messages.push( response_body["choices"][0]["message"] )
 
-                # Get the generated response from the API response and clean up a bit
+                # Get the generated response from the API response and add it to the console
                 generated_response = response_body["choices"][0]["message"]["content"]          
-                generated_response.strip!
-                # generated_response.gsub!(/<[^>]*>/,'')  # Strip HTML tags
-
-                # Display the generated response in the Ruby console
                 puts "\nResult ============\n"
                 puts generated_response
 
@@ -362,7 +385,7 @@ module AS_Extensions
                 info += "Tokens used: " + response_body["usage"]["total_tokens"].to_s                    
                 puts "\nStats ============\n"
                 puts info     
-                # puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
+                puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
 
                 # Double-check for a destructive request
                 badwords = ['delete','remove','erase','kill','expunge']
@@ -381,19 +404,23 @@ module AS_Extensions
 
                     # Extract the generated code
                     if generated_response.include? "```ruby"     # For quoted code
-                        generated_code = generated_response[/```ruby(.*?)```/m, 1].strip! 
-                        generated_code.gsub!(/<[^>]*>/,'')  # Strip HTML tags
-                        # generated_code.gsub!(/<[^>]+?>/,'')  # Strip HTML tags (with attributes)
+                        generated_code = generated_response[/```ruby(.*?)```/m, 1]
+                        generated_code.gsub!(/<[^>]+?>/,'')  # Strip HTML tags (with attributes)
                         info += " | Code was executed."
                     elsif generated_response.include? "<pre>"     # For HTML tags
-                        generated_code = generated_response[/\<pre\>(.*?)\<\/pre\>/m, 1].strip! 
-                        generated_code.gsub!(/<[^>]*>/,'')  # Strip HTML tags
-                        # generated_code.gsub!(/<[^>]+?>/,'')  # Strip HTML tags (with attributes)
+                        generated_code = generated_response[/\<pre\>(.*?)\<\/pre\>/m, 1]
+                        generated_code.gsub!(/<[^>]+?>/,'')  # Strip HTML tags (with attributes)
                         info += " | Code was executed."
                     else
-                        generated_code = ''   # generated_response   previously for older models that did not quote
+                        generated_code = ''
                         info += " | No usable code in the response."
                     end
+
+                    # Display the generated response in the Ruby console
+                    # if generated_code != ''
+                    #     puts "\nExecuted Code ============\n"
+                    #     puts generated_code   
+                    # end                 
                     
                     # Execute it and capture any output
                     old_stdout = $stdout
@@ -451,7 +478,7 @@ module AS_Extensions
 
                 # Remove any enclosing HTML code markdown - need for Gemini
                 if generated_response.include? "```html"
-                  generated_response = generated_response[/```html(.*?)```/m, 1].strip!
+                  generated_response = generated_response[/```html(.*?)```/m, 1]
                 end
 
                 # Replace code tags first
@@ -471,7 +498,7 @@ module AS_Extensions
                 generated_response.gsub!( /####\s(.*)?\n/ ) { "<h4>#{$1}</h4>" }
                 generated_response.gsub!( /###\s(.*)?\n/ ) { "<h3>#{$1}</h3>" } 
                 generated_response.gsub!( /##\s(.*)?\n/ ) { "<h2>#{$1}</h2>" }   
-                generated_response.gsub!( /#\s(.*)?\n/ ) { "<h1>#{$1}</h1>" }
+                generated_response.gsub!( /^#\s+(.*)$/ ) { "<h1>#{$1}</h1>" }
                 generated_response.gsub!( /\`(.*?)\`/ ) { "<span class='icode'>#{$1}</span>" } 
                 
                 # Now bring code blocks back in

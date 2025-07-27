@@ -88,6 +88,12 @@ History:        1.0 (3/18/2023):
                 - Cleared up purpose of raw output in console
                 - Added a better TOU dialog design
                 - Changed default model to gpt-4.1-mini
+                3.1 (TBD):
+                - Changed UI to use Bootstrap 5
+                - Changed settings dialog to be integrated into main dialog
+                - Added file upload support
+                - Implemented better error handling for non-OpenAI services
+
                 
                 
                 

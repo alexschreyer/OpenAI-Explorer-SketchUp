@@ -14,8 +14,8 @@
             body { min-width: 220px; }
             .icode { font-family: monospace; padding: 1px 2px; }
             #output { height: calc(100vh - 165px); overflow: auto; }
-            .prompt { color: #222; background-color: #fff; margin: 0.5em; padding: 0.5em 1em; width: 80%; border-radius: 1em 1em 1em 0; float: left; clear: both; }
-            .response { color: #eee; background-color: #0063a3; margin: 0.5em; padding: 0.5em 1em; width: 80%; border-radius: 1em 1em 0 1em; float: right; clear: both; }
+            .prompt { position: relative; color: #222; background-color: #fff; margin: 0.5em; padding: 0.5em 1em; width: 80%; border-radius: 1em 1em 1em 0; float: left; clear: both; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
+            .response { color: #eee; background-color: #0063a3; margin: 0.5em; padding: 0.5em 1em; width: 80%; border-radius: 1em 1em 0 1em; float: right; clear: both; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
             .response p, .response pre { margin-bottom:0.5em; }
             .response code { color: #222; background-color: #dcedf9; padding: 0.1em 0.2em;}
             .thumbnail { width: 30vw; height: auto; margin: 10px; float: right; }
@@ -114,16 +114,23 @@
                 </div>                          
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="use-function-calling" checked>
-                    <label class="form-check-label" for="use-function-calling">Use function calling</label>
+                    <label class="form-check-label" for="use-function-calling">Use function calling (VERY Experimental!)</label>
                 </div>
                 <div class="mb-3">
-                    <label for="function-calling-json" class="form-label">Function Calling JSON</label>
+                    <label for="function-calling-json" class="form-label">"tools":</label>
                     <div id="function-calling-json" style="height:120px;"></div>
                     <div class="form-text m-1">Edit the JSON for function calling. This will call the respective SketchUp function if code execution is enabled.</div>
                 </div>                          
                  <div class="mb-3">
                   <label for="ai-model" class="form-label">AI Model</label>
                   <input type="text" class="form-control" id="ai-model" placeholder="e.g., gpt-4" value="gpt-4.1-mini">
+                    <div id="ai-model-help" class="form-text m-1">
+                        Learn more about AI models here: 
+                        <a href="https://platform.openai.com/docs/models" target="_blank">OpenAI</a>, 
+                        <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">Google</a>,
+                        <a href="https://docs.anthropic.com/en/docs/about-claude/models/overview" target="_blank">Anthropic</a>,
+                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
+                    </div>                    
                 </div>      
                 <div class="mb-3">
                   <label for="api-key" class="form-label">API Key</label>
@@ -232,13 +239,28 @@
             function applyColorMode(mode) {
                 const $htmlElement = $('html');
                 if (mode === 'light') {
-                $htmlElement.attr('data-bs-theme', 'light');
+                    $htmlElement.attr('data-bs-theme', 'light');
+                    // Change all CodeMirror editors to default theme
+                    $('.CodeMirror').each(function() {
+                        const cm = this.CodeMirror;
+                        if (cm) cm.setOption('theme', 'default');
+                    });
                 } else if (mode === 'dark') {
-                $htmlElement.attr('data-bs-theme', 'dark');
+                    $htmlElement.attr('data-bs-theme', 'dark');
+                    // Change all CodeMirror editors to darcula theme
+                    $('.CodeMirror').each(function() {
+                        const cm = this.CodeMirror;
+                        if (cm) cm.setOption('theme', 'darcula');
+                    });
                 } else {
-                // Auto mode: Use system preferences
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                $htmlElement.attr('data-bs-theme', prefersDark ? 'dark' : 'light');
+                    // Auto mode: Use system preferences
+                    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    $htmlElement.attr('data-bs-theme', prefersDark ? 'dark' : 'light');
+                    // Set CodeMirror theme accordingly
+                    $('.CodeMirror').each(function() {
+                        const cm = this.CodeMirror;
+                        if (cm) cm.setOption('theme', prefersDark ? 'darcula' : 'default');
+                    });
                 }
             }         
             
@@ -259,19 +281,25 @@
                 jQuery('.temp').remove();
                 jQuery('#output').append("<div class='response'>" + resp.trimEnd() + "</div>");
                 jQuery('#output').append("<div class='details small'>" + info + "</div>");
-                // Convert <code> that is not contained in a <p> or <li> tag to a CodeMirror editor
-                // jQuery('.response:last code:not(p code, li code)').each(function() {
+                // Convert <pre> that is not contained in a <p> or <li> tag to a CodeMirror editor
                 jQuery('.response:last pre:not(p pre, li pre)').each(function() {
-                    const codeBlock = this; // Reference to the current <code> block
+                    const codeBlock = this; // Reference to the current <pre> block
 
-                    // Create a CodeMirror instance for the <code> block
+                    // Determine theme based on UI color mode
+                    let theme = 'darcula';
+                    const colorMode = $('html').attr('data-bs-theme');
+                    if (colorMode === 'light') {
+                        theme = 'default';
+                    }
+
+                    // Create a CodeMirror instance for the <pre> block
                     const editor = CodeMirror(function(elt) {
-                        // Replace the <code> block with the CodeMirror editor
+                        // Replace the <pre> block with the CodeMirror editor
                         codeBlock.parentNode.replaceChild(elt, codeBlock);
                     }, {
-                        value: jQuery(codeBlock).text(), // Get the text content of the <code> block
+                        value: jQuery(codeBlock).text(), // Get the text content of the <pre> block
                         mode: 'ruby', 
-                        theme: "darcula",
+                        theme: theme,
                         lineNumbers: true,
                         lineWrapping: true,
                         readOnly: true,
@@ -366,7 +394,7 @@
 
             // Initialize CodeMirror for function calling JSON
             let functionCallingEditor = CodeMirror(document.getElementById('function-calling-json'), {
-                value: "\"tools\": [ ]",
+                value: "[]",
                 mode: { name: "javascript", json: true },
                 theme: "darcula",
                 lineNumbers: true,
