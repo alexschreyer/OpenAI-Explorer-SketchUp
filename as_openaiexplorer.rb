@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          AI Explorer (Experimental)
 
-Version:        3.0.1
+Version:        3.1
 
-Date :          4/26/2025
+Date :          10/1/2025
 
 Description :   An experimental extension to use OpenAI’s (or Google's / Anthropic's) services to create or manipulate geometry in SketchUp using natural language.
 
@@ -88,12 +88,13 @@ History:        1.0 (3/18/2023):
                 - Cleared up purpose of raw output in console
                 - Added a better TOU dialog design
                 - Changed default model to gpt-4.1-mini
-                3.1 (TBD):
-                - Changed UI to use Bootstrap 5
+                3.1 (10/1/2025):
+                - Changed UI to use Bootstrap 5 instead of raw CSS, included all files locally
                 - Changed settings dialog to be integrated into main dialog
+                - Changed onboarding routine for API key
                 - Added file upload support for PDF and RB files (only works with OpenAI for now)
                 - Implemented better error handling for non-OpenAI services
-                - Fixed max_completion_tokens parameter
+                - Fixed max_completion_tokens parameter to improve compatibility
 
                 
                 

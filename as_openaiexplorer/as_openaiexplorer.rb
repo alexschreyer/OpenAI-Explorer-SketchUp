@@ -24,7 +24,7 @@ module AS_Extensions
       "aiModel" => "gpt-4.1-mini",  # Chat Completion Model
       "maxTokens" => "1024",  # Max. Tokens
       "temperature" => "0.1",  # Temperature
-      "apiKey" => "Enter your API key here",  # OpenAI/Google/... API key
+      "apiKey" => "",  # OpenAI/Google/... API key
       "executeCode" => false,  # Execute code
       "submitModelView" => false,  # Submit model view with request
       "modelViewQuality" => "low",  # Model view submission quality
@@ -32,7 +32,7 @@ module AS_Extensions
       "aiEndpoint" => "https://api.openai.com/v1/chat/completions",  # Service provider endpoint
       "colorMode" => "dark",  # Color mode
       "useCase" => "chat",  # Use case
-      "useFunctionCalling" => false,  # Use function calling
+      "useFunctionCalling" => false,  # Use function calling - Not used at this point
       "functionCallingJson" => "[]"  # Function calling JSON
     }
     

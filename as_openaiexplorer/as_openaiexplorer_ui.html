@@ -5,11 +5,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <!-- Bootstrap CSS -->
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-        <link href="https://cdn.jsdelivr.net/npm/@trimble-oss/modus-bootstrap@2.0.10/dist/css/modus-bootstrap.min.css" rel="stylesheet">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/6.65.7/theme/darcula.min.css" integrity="sha512-kqCOYFDdyQF4JM8RddA6rMBi9oaLdR0aEACdB95Xl1EgaBhaXMIe8T4uxmPitfq4qRmHqo+nBU2d1l+M4zUx1g==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+        <link href="src/bootstrap/5.3.2/bootstrap.min.css" rel="stylesheet">
+        <link href="src/modus-bootstrap/2.0.10/modus-bootstrap.min.css" rel="stylesheet">
+        <link href="src/codemirror/5.65.13/codemirror.min.css" rel="stylesheet">
+        <link href="src/codemirror/5.65.13/darcula.min.css" rel="stylesheet">
+        <link href="src/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
         <style>
             body { min-width: 220px; }
             .icode { font-family: monospace; padding: 1px 2px; }
@@ -173,11 +173,11 @@
         </div>
 
         <!-- Scripts -->
-        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/ruby/ruby.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/mode/javascript/javascript.min.js"></script>
-        <script src="src/jquery-3.7.0.min.js"></script>
+        <script src="src/bootstrap/5.3.2/bootstrap.bundle.min.js"></script>
+        <script src="src/codemirror/5.65.13/codemirror.min.js"></script>
+        <script src="src/codemirror/5.65.13/ruby.min.js"></script>
+        <script src="src/codemirror/5.65.13/javascript.min.js"></script>
+        <script src="src/jquery/3.7.0/jquery-3.7.0.min.js"></script>
         
         <script>     
             // Gather all settings into a JSON object
@@ -196,8 +196,9 @@
                     modelViewQuality: $('#model-view-quality').val(),
                     numPrompts: $('#num-prompts').val(),
                     useCase: $('#use_case').val(),
-                    useFunctionCalling: $('#use-function-calling').is(':checked'),
-                    functionCallingJson: functionCallingEditor.getValue()
+                    // Feature disabled for now:
+                    // useFunctionCalling: $('#use-function-calling').is(':checked'),
+                    // functionCallingJson: functionCallingEditor.getValue()
                 };
 
                 // console.log("Settings to write:", settings);
@@ -221,10 +222,9 @@
                 if (settings.modelViewQuality !== undefined) $('#model-view-quality').val(settings.modelViewQuality);
                 if (settings.numPrompts !== undefined) $('#num-prompts').val(settings.numPrompts);
                 if (settings.useCase !== undefined) $('#use_case').val(settings.useCase);
-                if (settings.useFunctionCalling !== undefined) $('#use-function-calling').prop('checked', settings.useFunctionCalling).trigger('change');
-                if (settings.functionCallingJson !== undefined) {
-                    functionCallingEditor.setValue(settings.functionCallingJson);
-                }
+                // Feature disabled for now:
+                // if (settings.useFunctionCalling !== undefined) $('#use-function-calling').prop('checked', settings.useFunctionCalling).trigger('change');
+                // if (settings.functionCallingJson !== undefined) {functionCallingEditor.setValue(settings.functionCallingJson);}
             }     
             
             // Apply the dialog color mode using jQuery
@@ -397,7 +397,6 @@
             // Apply the selected color mode
             jQuery('#colorMode').change(function () {
                 const selectedMode = jQuery(this).val();
-                localStorage.setItem('colorMode', selectedMode);   // TODO remove line later
                 applyColorMode(selectedMode);
             });
 
@@ -406,6 +405,7 @@
                 write_settings();
             });
 
+            // Feature disabled for now
             // Initialize CodeMirror for function calling JSON
             /* let functionCallingEditor = CodeMirror(document.getElementById('function-calling-json'), {
                 value: "[]",
@@ -418,8 +418,9 @@
                 tabSize: 2
             }); */
 
+            // Feature disabled for now
             // Enable/disable editor based on checkbox
-            $('#use-function-calling').on('change', function() {
+            /* $('#use-function-calling').on('change', function() {
                 const enabled = $(this).is(':checked');
                 $('#function-calling-json').prop('disabled', !enabled);
                 functionCallingEditor.setOption('readOnly', !enabled);
@@ -428,7 +429,7 @@
                 } else {
                     functionCallingEditor.getWrapperElement().classList.add('cm-disabled');
                 }
-            });
+            }); */
 
             // Add a disabled style for CodeMirror
             $('<style>.cm-disabled .CodeMirror-scroll { background: #222 !important; opacity: 0.5; pointer-events: none; }</style>').appendTo('head');
