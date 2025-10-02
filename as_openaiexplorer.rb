@@ -91,8 +91,9 @@ History:        1.0 (3/18/2023):
                 3.1 (TBD):
                 - Changed UI to use Bootstrap 5
                 - Changed settings dialog to be integrated into main dialog
-                - Added file upload support
+                - Added file upload support for PDF and RB files (only works with OpenAI for now)
                 - Implemented better error handling for non-OpenAI services
+                - Fixed max_completion_tokens parameter
 
                 
                 

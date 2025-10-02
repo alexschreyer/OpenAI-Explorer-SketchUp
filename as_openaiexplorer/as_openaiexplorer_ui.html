@@ -90,20 +90,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
             </div>
             <div class="offcanvas-body">
-                <h3>Extension:</h3>
-                <div class="mb-3">
-                    <label for="colorMode" class="form-label">Color Mode</label>
-                    <select id="colorMode" class="form-select">
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
-                        <option value="user">User Preference</option>
-                    </select>
-                </div>
-                <h3>AI Service:</h3>
+                <h3>Run Options:</h3>          
                 <div class="mb-3">
                   <label for="system-message" class="form-label">System Message</label>
                   <textarea class="form-control" id="system-message" rows="2" placeholder="Enter a system message">Generate only valid SketchUp Ruby code.</textarea>
                 </div>      
+                <label class="form-label">Run Options:</label>
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="execute-code">
                     <label class="form-check-label" for="execute-code">Execute code</label>
@@ -111,46 +103,7 @@
                 <div class="mb-3 form-check">
                     <input type="checkbox" class="form-check-input" id="submit-model-view">
                     <label class="form-check-label" for="submit-model-view">Submit model view with request</label>
-                </div>                          
-                <div class="mb-3 form-check">
-                    <input type="checkbox" class="form-check-input" id="use-function-calling" checked>
-                    <label class="form-check-label" for="use-function-calling">Use function calling (VERY Experimental!)</label>
-                </div>
-                <div class="mb-3">
-                    <label for="function-calling-json" class="form-label">"tools":</label>
-                    <div id="function-calling-json" style="height:120px;"></div>
-                    <div class="form-text m-1">Edit the JSON for function calling. This will call the respective SketchUp function if code execution is enabled.</div>
-                </div>                          
-                 <div class="mb-3">
-                  <label for="ai-model" class="form-label">AI Model</label>
-                  <input type="text" class="form-control" id="ai-model" placeholder="e.g., gpt-4" value="gpt-4.1-mini">
-                    <div id="ai-model-help" class="form-text m-1">
-                        Learn more about AI models here: 
-                        <a href="https://platform.openai.com/docs/models" target="_blank">OpenAI</a>, 
-                        <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">Google</a>,
-                        <a href="https://docs.anthropic.com/en/docs/about-claude/models/overview" target="_blank">Anthropic</a>,
-                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
-                    </div>                    
-                </div>      
-                <div class="mb-3">
-                  <label for="api-key" class="form-label">API Key</label>
-                  <input type="password" class="form-control" id="api-key" placeholder="Enter your API key" autocomplete="off">
-                    <div id="api-key-help" class="form-text m-1">
-                        You can get your API key here: 
-                        <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>, 
-                        <a href="https://aistudio.google.com/apikey" target="_blank">Google</a>,
-                        <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic</a>,
-                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
-                    </div>   
-                </div>    
-                <div class="mb-3">
-                  <label for="ai-endpoint" class="form-label">AI Endpoint URL</label>
-                  <input type="text" class="form-control" id="ai-endpoint" placeholder="https://api.example.com/chat/completions" value="https://api.openai.com/v1/chat/completions">
-                    <div id="api-endpoint-help" class="form-text m-1">
-                        You can find endpoint URLs 
-                        <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">on this page</a>.
-                    </div>                  
-                </div>
+                </div>                                           
                 <div class="mb-3">
                   <label for="temperature" class="form-label">Temperature</label>
                   <input type="number" class="form-control" id="temperature" value="0.2" step="0.1" min="0" max="1">
@@ -176,7 +129,46 @@
                         <option value="9">9</option>
                     </select>
                 </div>  
-                              
+                <h3>AI Service:</h3>
+                <div class="mb-3">
+                  <label for="ai-model" class="form-label">AI Model</label>
+                  <input type="text" class="form-control" id="ai-model" placeholder="e.g., gpt-4" value="gpt-4.1-mini">
+                    <div id="ai-model-help" class="form-text m-1">
+                        Learn more about AI models here: 
+                        <a href="https://platform.openai.com/docs/models" target="_blank">OpenAI</a>, 
+                        <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">Google</a>,
+                        <a href="https://docs.anthropic.com/en/docs/about-claude/models/overview" target="_blank">Anthropic</a>,
+                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
+                    </div>                    
+                </div>      
+                <div class="mb-3">
+                  <label for="api-key" class="form-label">API Key</label>
+                  <input type="password" class="form-control" id="api-key" placeholder="Paste your API key here" autocomplete="off">
+                    <div id="api-key-help" class="form-text m-1">
+                        You can get your API key here: 
+                        <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>, 
+                        <a href="https://aistudio.google.com/apikey" target="_blank">Google</a>,
+                        <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic</a>,
+                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
+                    </div>   
+                </div>    
+                <div class="mb-3">
+                  <label for="ai-endpoint" class="form-label">AI Endpoint URL</label>
+                  <input type="text" class="form-control" id="ai-endpoint" placeholder="https://api.example.com/chat/completions" value="https://api.openai.com/v1/chat/completions">
+                    <div id="api-endpoint-help" class="form-text m-1">
+                        You can find endpoint URLs 
+                        <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">on this page</a>.
+                    </div>                  
+                </div>      
+                <h3>Extension:</h3>
+                <div class="mb-3">
+                    <label for="colorMode" class="form-label">Color Mode</label>
+                    <select id="colorMode" class="form-select">
+                        <option value="light">Light</option>
+                        <option value="dark">Dark</option>
+                        <option value="user">System Preference</option>
+                    </select>
+                </div>            
             </div>
         </div>
 
@@ -272,8 +264,15 @@
                 // Select the prompt on startup
                 jQuery('#prompt').select();
                 // Set up tooltips
-                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+                const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl));
+                // Remove any errors when input changes
+                $('#api-key').on('change input', function() {
+                    if ($(this).val().length > 20) {
+                        $(this).removeClass('is-invalid');
+                        $(this).siblings('.invalid-feedback').remove();
+                    }
+                });
             });            
         
             // Function to remove the temp box and output the response
@@ -319,12 +318,27 @@
             // Submit the prompt to SU
             jQuery("#AISubmit").submit(function(event){
                 event.preventDefault();
-                if (jQuery('#prompt').val().length == 0) {
-                    alert('You must enter a prompt.');
+                if (jQuery('#api-key').val().length < 20) {
+                    // Open the options tab (offcanvas) and focus the API key field
+                    const offcanvas = new bootstrap.Offcanvas(document.getElementById('offcanvasOptions'));
+                    offcanvas.show();
+                    setTimeout(function() {
+                        document.getElementById('api-key').focus();
+                    }, 400);
+                    // Remove any previous error
+                    $('#api-key').removeClass('is-invalid');
+                    $('#api-key').next('.invalid-feedback').remove();
+                    // Add Bootstrap error below the API key field
+                    $('#api-key').addClass('is-invalid').after('<div class="invalid-feedback">You must enter a valid API key first.</div>');
                     return false;
-                };
-                prompt = jQuery('#prompt').val();
-                sketchup.submit_prompt(prompt);
+                }
+                else if (jQuery('#prompt').val().length == 0) {
+                    alert('Please enter a prompt.');
+                    return false;
+                } else {
+                    prompt = jQuery('#prompt').val();
+                    sketchup.submit_prompt(prompt);
+                };                
             });
         
             // Change the use case presets
@@ -393,7 +407,7 @@
             });
 
             // Initialize CodeMirror for function calling JSON
-            let functionCallingEditor = CodeMirror(document.getElementById('function-calling-json'), {
+            /* let functionCallingEditor = CodeMirror(document.getElementById('function-calling-json'), {
                 value: "[]",
                 mode: { name: "javascript", json: true },
                 theme: "darcula",
@@ -402,7 +416,7 @@
                 readOnly: false,
                 viewportMargin: Infinity,
                 tabSize: 2
-            });
+            }); */
 
             // Enable/disable editor based on checkbox
             $('#use-function-calling').on('change', function() {

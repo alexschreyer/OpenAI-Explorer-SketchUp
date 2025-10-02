@@ -348,8 +348,8 @@ module AS_Extensions
                 body_hash = {
                   "model" => settings["aiModel"].to_s,
                   "messages" => [{ "role" => "system", "content" => "#{sys_prompt}" }] + @ai_messages.last( settings["numPrompts"].to_i ),
-                  "max_tokens" => settings["maxTokens"].to_i,
-                  "top_p" => 1,
+                  "max_completion_tokens" => settings["maxTokens"].to_i,
+                  # "top_p" => 1,
                   "n" => 1,
                   "temperature" => settings["temperature"].to_f,
                   "stream" => false
