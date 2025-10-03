@@ -117,7 +117,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "3.0.1"
+    @extversion           = "3.1"
     @exttitle             = "AI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
