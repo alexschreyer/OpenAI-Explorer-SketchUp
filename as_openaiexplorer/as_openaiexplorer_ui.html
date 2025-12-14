@@ -104,9 +104,25 @@
                     <input type="checkbox" class="form-check-input" id="submit-model-view">
                     <label class="form-check-label" for="submit-model-view">Submit model view with request</label>
                 </div>                                           
+                <div class="mb-3 form-check">
+                    <input type="checkbox" class="form-check-input" id="show-raw-data">
+                    <label class="form-check-label" for="show-raw-data">Show raw data in Ruby console</label>
+                </div>                                           
                 <div class="mb-3">
                   <label for="temperature" class="form-label">Temperature</label>
                   <input type="number" class="form-control" id="temperature" value="0.2" step="0.1" min="0" max="1">
+                </div>
+                <div class="mb-3">
+                    <label for="reasoning-effort" class="form-label">Reasoning effort</label>
+                        <select class="form-select" id="reasoning-effort">
+                            <option value="exclude">Exclude</option>
+                            <option value="none">None</option>
+                            <option value="minimal">Minimal</option>
+                            <option value="low">Low</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="high">High</option>
+                            <option value="xhigh">Extra High</option>
+                        </select>
                 </div>
                 <div class="mb-3">
                   <label for="max-tokens" class="form-label">Max. Tokens</label>
@@ -188,6 +204,7 @@
                     systemMessage: $('#system-message').val(),
                     executeCode: $('#execute-code').is(':checked'),
                     submitModelView: $('#submit-model-view').is(':checked'),
+                    showRawData: $('#show-raw-data').is(':checked'),
                     aiModel: $('#ai-model').val(),
                     apiKey: $('#api-key').val(),
                     aiEndpoint: $('#ai-endpoint').val(),
@@ -195,6 +212,7 @@
                     maxTokens: parseInt($('#max-tokens').val(), 10),
                     modelViewQuality: $('#model-view-quality').val(),
                     numPrompts: $('#num-prompts').val(),
+                    reasoning_effort: $('#reasoning-effort').val(),
                     useCase: $('#use_case').val(),
                     // Feature disabled for now:
                     // useFunctionCalling: $('#use-function-calling').is(':checked'),
@@ -221,6 +239,8 @@
                 if (settings.maxTokens !== undefined) $('#max-tokens').val(settings.maxTokens);
                 if (settings.modelViewQuality !== undefined) $('#model-view-quality').val(settings.modelViewQuality);
                 if (settings.numPrompts !== undefined) $('#num-prompts').val(settings.numPrompts);
+                if (settings.reasoning_effort !== undefined) $('#reasoning-effort').val(settings.reasoning_effort);
+                if (settings.showRawData !== undefined) $('#show-raw-data').prop('checked', settings.showRawData);
                 if (settings.useCase !== undefined) $('#use_case').val(settings.useCase);
                 // Feature disabled for now:
                 // if (settings.useFunctionCalling !== undefined) $('#use-function-calling').prop('checked', settings.useFunctionCalling).trigger('change');
@@ -301,10 +321,11 @@
                         theme: theme,
                         lineNumbers: true,
                         lineWrapping: true,
-                        readOnly: false,   // Allow editing of the code
+                        readOnly: true,   // false = allow editing of the code
                     });
 
-                    // TEST NEW ROUTINE START
+                    /* 
+                    // TEST RUN ROUTINE START
 
                     // Add a small play button below the editor to execute the Ruby code in SketchUp
                     try {
@@ -348,7 +369,8 @@
                         console.warn('Could not add run button for editor:', e);
                     }
 
-                    // TEST NEW ROUTINE END
+                    // TEST RUN ROUTINE END
+                    */ 
                     
                 });
                 jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);

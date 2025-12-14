@@ -30,6 +30,8 @@ module AS_Extensions
       "modelViewQuality" => "low",  # Model view submission quality
       "numPrompts" => "3",  # Number of submitted messages (user and assistant)
       "aiEndpoint" => "https://api.openai.com/v1/chat/completions",  # Service provider endpoint
+      "reasoning_effort" => "medium", # Reasoning effort: low, medium, high
+      "showRawData" => false, # Show raw request/response data in the Ruby console
       "colorMode" => "dark",  # Color mode
       "useCase" => "chat",  # Use case
       "useFunctionCalling" => false,  # Use function calling - Not used at this point
@@ -57,15 +59,27 @@ module AS_Extensions
 
       # puts "System messages loaded successfully from #{file_path}."
     rescue Errno::ENOENT
-      puts "Error: File not found at #{file_path}."
+      puts_if_enabled "Error: File not found at #{file_path}."
     rescue JSON::ParserError => e
-      puts "Error parsing JSON file: #{e.message}"
+      puts_if_enabled "Error parsing JSON file: #{e.message}"
     rescue StandardError => e
-      puts "An error occurred: #{e.message}"
+      puts_if_enabled "An error occurred: #{e.message}"
     end
   
   
     # ==================
+    
+    # Helper to print debug output only when enabled in settings
+    def self.puts_if_enabled(*args)
+      begin
+        settings = Sketchup.read_default( @extname , "ai_explorer_settings_hash" , @default_settings_hash )
+      rescue Exception
+        settings = @default_settings_hash
+      end
+      if settings && settings["showRawData"]
+        puts(*args)
+      end
+    end
     
     
     def self.encoded_screenshot
@@ -276,8 +290,8 @@ module AS_Extensions
                 sys_prompt += " Format your response with HTML tags for the BODY section of a page (but exclude the BODY tag). Enclose any Ruby code in <pre> tags."
 
                 # Add raw data to console output
-                puts "\n#{@exttitle} - RAW OUTPUT:\n"
-                puts "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
+                puts_if_enabled "\n#{@exttitle} - RAW OUTPUT:\n"
+                puts_if_enabled "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                 
                 # Set up user mesage (only prompt, no image)
                 user_message = {  
@@ -326,7 +340,7 @@ module AS_Extensions
                   begin
                     function_json = JSON.parse(settings["functionCallingJson"].to_s)
                   rescue JSON::ParserError => e
-                    puts "Error parsing function calling JSON: #{e.message}"
+                    puts_if_enabled "Error parsing function calling JSON: #{e.message}"
                     function_json = nil
                   end
                 else
@@ -356,6 +370,18 @@ module AS_Extensions
                   # "stop" => "\n"
                 }
 
+                # Include reasoning effort where supported. For Google Gemini-style endpoints we map
+                # to the `reasoning` object (e.g., {"effort":"medium"}). For other endpoints we
+                # include it as a generic `reasoning_effort` field so it is preserved.
+                # If the user selects "Exclude", do not add the field to the request at all.
+                if settings["reasoning_effort"] && settings["reasoning_effort"].to_s.strip != "" && settings["reasoning_effort"].to_s.downcase != "exclude"
+                  if endpoint.include?("aistudio.google") || endpoint.include?("google") || settings["aiModel"].to_s.downcase.include?("gemini")
+                    body_hash["reasoning"] = { "effort" => settings["reasoning_effort"].to_s }
+                  else
+                    body_hash["reasoning_effort"] = settings["reasoning_effort"].to_s
+                  end
+                end
+
                 # Only add the tool code if executeCode is true
                 body_hash["tools"] = function_json if ( function_json and settings["executeCode"] )
 
@@ -368,24 +394,24 @@ module AS_Extensions
                 response_body = JSON.parse(res.body)
                 
                 # Add raw response to console output
-                puts "\nRaw Request ============\n"
-                puts req.body
-                puts "\nRaw Response ============\n"
-                puts response_body
+                puts_if_enabled "\nRaw Request ============\n"
+                puts_if_enabled req.body
+                puts_if_enabled "\nRaw Response ============\n"
+                puts_if_enabled response_body
                 
                 # Add the response to the array of messages
                 @ai_messages.push( response_body["choices"][0]["message"] )
 
                 # Get the generated response from the API response and add it to the console
                 generated_response = response_body["choices"][0]["message"]["content"]          
-                puts "\nResult ============\n"
-                puts generated_response
+                puts_if_enabled "\nResult ============\n"
+                puts_if_enabled generated_response
 
                 # Display some statistics in the Ruby console
                 info += "Tokens used: " + response_body["usage"]["total_tokens"].to_s                    
-                puts "\nStats ============\n"
-                puts info     
-                puts "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
+                puts_if_enabled "\nStats ============\n"
+                puts_if_enabled info    
+                puts_if_enabled "Finish reason: " + response_body["choices"][0]["finish_reason"].to_s    
 
                 # Double-check for a destructive request
                 badwords = ['delete','remove','erase','kill','expunge']
@@ -435,7 +461,7 @@ module AS_Extensions
 
                     nocode = "No code was executed."
                     info += " | " + nocode
-                    puts nocode
+                    puts_if_enabled nocode
 
                 end      
 
@@ -457,7 +483,7 @@ module AS_Extensions
                 # Provide an error message for SketchUp errors
                 errmsg += "<b>(SketchUp:)</b> #{e}. "
 
-                puts "This request generated an error. See dialog for details.\n"        
+                puts_if_enabled "This request generated an error. See dialog for details.\n"        
                 
                 # Reset the output in any case
                 $stdout = old_stdout if old_stdout

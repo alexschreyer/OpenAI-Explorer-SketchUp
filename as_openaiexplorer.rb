@@ -97,6 +97,9 @@ History:        1.0 (3/18/2023):
                 - Added file upload support for PDF and RB files (only works with OpenAI for now)
                 - Implemented better error handling for non-OpenAI services
                 - Fixed max_completion_tokens parameter to improve compatibility
+                3.2 (TBD):
+                - Added reasoning_effort parameter (with mod for Google)
+                - Added setting to show/hide raw data in console
 
                 
                 
