@@ -301,8 +301,55 @@
                         theme: theme,
                         lineNumbers: true,
                         lineWrapping: true,
-                        readOnly: true,
+                        readOnly: false,   // Allow editing of the code
                     });
+
+                    // TEST NEW ROUTINE START
+
+                    // Add a small play button below the editor to execute the Ruby code in SketchUp
+                    try {
+                        const wrapper = editor.getWrapperElement();
+                        const container = document.createElement('div');
+                        container.className = 'play-button-container mt-2';
+
+                        const btn = document.createElement('button');
+                        btn.type = 'button';
+                        btn.className = 'btn btn-sm btn-success play-code';
+                        btn.title = 'Execute this Ruby code in SketchUp';
+                        btn.innerHTML = '<i class="fas fa-play"></i> Run';
+
+                        btn.addEventListener('click', function() {
+                            const code = editor.getValue();
+                            if (!code || code.trim().length === 0) {
+                                alert('No code to run.');
+                                return;
+                            }
+                            // Confirm with the user before executing potentially destructive code
+                            if (!confirm('Execute this Ruby code in SketchUp?')) return;
+
+                            // Call into the SketchUp Ruby bridge. Assumption: a function named
+                            // `sketchup.execute_ruby` exists on the Ruby side and accepts a string.
+                            if (typeof sketchup !== 'undefined' && typeof sketchup.execute_ruby === 'function') {
+                                sketchup.execute_ruby(code);
+                            } else if (typeof sketchup !== 'undefined' && typeof sketchup.executeCode === 'function') {
+                                // Fallback if different naming is used on the Ruby side
+                                sketchup.executeCode(code);
+                            } else {
+                                // If no bridge function exists, instruct the user
+                                alert('Execution bridge not available: expected `sketchup.execute_ruby(code)` to be defined in the host application.');
+                            }
+                        });
+
+                        container.appendChild(btn);
+                        // Insert the container after the editor wrapper
+                        if (wrapper && wrapper.parentNode) wrapper.parentNode.insertBefore(container, wrapper.nextSibling);
+                    } catch (e) {
+                        // Non-fatal: if anything goes wrong here, leave the editor as-is
+                        console.warn('Could not add run button for editor:', e);
+                    }
+
+                    // TEST NEW ROUTINE END
+                    
                 });
                 jQuery('#output').animate({ scrollTop: $('#output').prop("scrollHeight")}, 1000);
                 jQuery('#prompt').select();

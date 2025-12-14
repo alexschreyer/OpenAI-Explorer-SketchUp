@@ -90,6 +90,8 @@ History:        1.0 (3/18/2023):
                 - Changed default model to gpt-4.1-mini
                 3.1 (10/1/2025):
                 - Changed UI to use Bootstrap 5 instead of raw CSS, included all files locally
+                - Added dark mode switch
+                - Added code rendering and highlighting
                 - Changed settings dialog to be integrated into main dialog
                 - Changed onboarding routine for API key
                 - Added file upload support for PDF and RB files (only works with OpenAI for now)
