@@ -23,16 +23,16 @@ module AS_Extensions
       "systemMessage" => "Respond within the context of SketchUp.",  # System Message
       "aiModel" => "gpt-4.1-mini",  # Chat Completion Model
       "maxTokens" => "1024",  # Max. Tokens
-      "temperature" => "0.1",  # Temperature
+      "temperature" => "1.0",  # Temperature
       "apiKey" => "",  # OpenAI/Google/... API key
       "executeCode" => false,  # Execute code
       "submitModelView" => false,  # Submit model view with request
       "modelViewQuality" => "low",  # Model view submission quality
       "numPrompts" => "3",  # Number of submitted messages (user and assistant)
       "aiEndpoint" => "https://api.openai.com/v1/chat/completions",  # Service provider endpoint
-      "reasoning_effort" => "medium", # Reasoning effort: low, medium, high
+      "reasoning_effort" => "exclude", # Reasoning effort: low, medium, high
       "showRawData" => false, # Show raw request/response data in the Ruby console
-      "colorMode" => "dark",  # Color mode
+      "colorMode" => "user",  # Color mode
       "useCase" => "chat",  # Use case
       "useFunctionCalling" => false,  # Use function calling - Not used at this point
       "functionCallingJson" => "[]"  # Function calling JSON
@@ -43,6 +43,9 @@ module AS_Extensions
 
     # Placeholder for file attachment
     @ai_attachment = ""  
+
+    # Track a single active HtmlDialog so only one can be open at a time
+    @active_html_dialog = nil
 
     # Load all the system messages from a JSON file
     @system_msgs = {}
@@ -163,6 +166,16 @@ module AS_Extensions
     
         toolname = @exttitle
         
+        # If another HtmlDialog from this extension is already open, bring it to front
+        if @active_html_dialog
+          begin
+            @active_html_dialog.show
+            @active_html_dialog.center if @active_html_dialog.respond_to?(:center)
+          rescue Exception
+          end
+          return
+        end
+
         # Show disclaimer once
         default = Sketchup.read_default( @extname , "disclaimer_acknowledged" )        
         if default.to_s != "yes" then 
@@ -190,13 +203,23 @@ module AS_Extensions
         @dialog.set_file(File.join(@extdir,@extname,'as_openaiexplorer_ui.html'))
         @dialog.show
         @dialog.center
+
+        # Mark this as the active dialog and clear it on close
+        @active_html_dialog = @dialog
+        if @dialog.respond_to?(:set_on_closed)
+          @dialog.set_on_closed { @active_html_dialog = nil; @dialog = nil }
+        elsif @dialog.respond_to?(:on_closed)
+          @dialog.on_closed { @active_html_dialog = nil; @dialog = nil }
+        end
         
         # Callback to close dialog
         @dialog.add_action_callback("close_dlg") { |action_context|
-            # Save the settings to SketchUp
-            js = "write_settings();"
-            @dialog.execute_script(js)
-            @dialog.close
+          # Save the settings to SketchUp
+          js = "write_settings();"
+          @dialog.execute_script(js)
+          @dialog.close
+          @active_html_dialog = nil
+          @dialog = nil
         }
         
         # Callback to show disclaimer dialog
@@ -293,7 +316,7 @@ module AS_Extensions
                 puts_if_enabled "\n#{@exttitle} - RAW OUTPUT:\n"
                 puts_if_enabled "\nPrompt ============\n(System:) #{sys_prompt}\n(User:) #{prompt}"
                 
-                # Set up user mesage (only prompt, no image)
+                # Set up user message (only prompt, no image)
                 user_message = {  
                                   "role" => "user", 
                                   "content" => [
@@ -301,7 +324,7 @@ module AS_Extensions
                                   ] 
                                 }
                 
-                # Modify user mesage if we want to include the model view
+                # Modify user message if we want to include the model view
                 if ( settings["submitModelView"] == true ) 
                     base64_image = encoded_screenshot;
                     user_message["content"].push(
@@ -370,16 +393,16 @@ module AS_Extensions
                   # "stop" => "\n"
                 }
 
-                # Include reasoning effort where supported. For Google Gemini-style endpoints we map
+                # Include reasoning effort where supported. For Google Gemini-style endpoints we map... AS: Necessary?
                 # to the `reasoning` object (e.g., {"effort":"medium"}). For other endpoints we
                 # include it as a generic `reasoning_effort` field so it is preserved.
                 # If the user selects "Exclude", do not add the field to the request at all.
                 if settings["reasoning_effort"] && settings["reasoning_effort"].to_s.strip != "" && settings["reasoning_effort"].to_s.downcase != "exclude"
-                  if endpoint.include?("aistudio.google") || endpoint.include?("google") || settings["aiModel"].to_s.downcase.include?("gemini")
-                    body_hash["reasoning"] = { "effort" => settings["reasoning_effort"].to_s }
-                  else
+                  # if endpoint.include?("aistudio.google") || endpoint.include?("google") || settings["aiModel"].to_s.downcase.include?("gemini")
+                  #   body_hash["reasoning"] = { "effort" => settings["reasoning_effort"].to_s }
+                  # else
                     body_hash["reasoning_effort"] = settings["reasoning_effort"].to_s
-                  end
+                  # end
                 end
 
                 # Only add the tool code if executeCode is true
@@ -643,16 +666,18 @@ module AS_Extensions
       menu.add_separator       
       menu.add_item("Get OpenAI API Key") { UI.openURL('https://platform.openai.com/api-keys') }      
       menu.add_item("Check OpenAI API Usage") { UI.openURL('https://platform.openai.com/usage') }
-      menu.add_item("View OpenAI Terms of Use") { UI.openURL('https://openai.com/policies/terms-of-use') }
       menu.add_separator 
       menu.add_item("Get Google API Key") { UI.openURL('https://aistudio.google.com/apikey') }  
+      menu.add_item("Check Google API Usage") { UI.openURL('https://aistudio.google.com/usage') }
       menu.add_item("Google API Compatibility") { UI.openURL('https://ai.google.dev/gemini-api/docs/openai#rest') }       
       menu.add_separator       
       menu.add_item("Get Anthropic API Key") { UI.openURL('https://console.anthropic.com/settings/keys') }  
+      menu.add_item("Check Anthropic API Usage") { UI.openURL('https://console.anthropic.com/usage') }      
       menu.add_item("Anthropic API Compatibility") { UI.openURL('https://docs.anthropic.com/en/api/openai-sdk') }       
       menu.add_separator       
       menu.add_item("Help") { self.show_help }      
       menu.add_item("Terms of Use") { self.show_disclaimer_window }
+      menu.add_item("View/edit default system messages") { UI.openURL("file:///#{File.join( @extdir , @extname , "system_msgs.json" )}") }  
       menu.add_item("Reset extension settings") { self.reset_settings }
 
       # Let Ruby know we have loaded this file

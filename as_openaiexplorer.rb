@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          AI Explorer (Experimental)
 
-Version:        3.1
+Version:        3.2
 
-Date :          10/1/2025
+Date :          12/15/2025
 
 Description :   An experimental extension to use OpenAI’s (or Google's / Anthropic's) services to create or manipulate geometry in SketchUp using natural language.
 
@@ -97,9 +97,13 @@ History:        1.0 (3/18/2023):
                 - Added file upload support for PDF and RB files (only works with OpenAI for now)
                 - Implemented better error handling for non-OpenAI services
                 - Fixed max_completion_tokens parameter to improve compatibility
-                3.2 (TBD):
-                - Added reasoning_effort parameter (with mod for Google)
-                - Added setting to show/hide raw data in console
+                3.2 (12/15/2025):
+                - Added reasoning_effort parameter for thinking models
+                - Added setting to show/hide raw data output in console, off by default
+                - Added menu option to edit default system mesages
+                - Prevented multiple dialog instances
+                - Adjusted default settings
+                - Cleaned up menu items
 
                 
                 
@@ -122,7 +126,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "3.1"
+    @extversion           = "3.2"
     @exttitle             = "AI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     
