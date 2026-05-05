@@ -154,7 +154,8 @@
                         <a href="https://platform.openai.com/docs/models" target="_blank">OpenAI</a>, 
                         <a href="https://ai.google.dev/gemini-api/docs/models" target="_blank">Google</a>,
                         <a href="https://docs.anthropic.com/en/docs/about-claude/models/overview" target="_blank">Anthropic</a>,
-                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
+                        <a href="https://docs.perplexity.ai/docs/agent-api/models" target="_blank">Perplexity</a>,
+                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/ai-explorer-manual/#using-different-ai-services" target="_blank">others</a>.
                     </div>                    
                 </div>      
                 <div class="mb-3">
@@ -165,7 +166,8 @@
                         <a href="https://platform.openai.com/api-keys" target="_blank">OpenAI</a>, 
                         <a href="https://aistudio.google.com/apikey" target="_blank">Google</a>,
                         <a href="https://console.anthropic.com/settings/keys" target="_blank">Anthropic</a>,
-                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">others</a>.
+                        <a href="https://console.perplexity.ai/keys/" target="_blank">Perplexity</a>,
+                        or <a href="https://alexschreyer.net/projects/openai-explorer-experimental/ai-explorer-manual/#using-different-ai-services" target="_blank">others</a>.
                     </div>   
                 </div>    
                 <div class="mb-3">
@@ -177,11 +179,10 @@
                       <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://generativelanguage.googleapis.com/v1beta/openai/chat/completions</div>                      
                       <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.anthropic.com/v1/chat/completions</div>
                       <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.perplexity.ai/chat/completions</div>
-                      <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.deepseek.com/chat/completions</div>
                     </div>
                   </div>
                     <div id="api-endpoint-help" class="form-text m-1">
-                        You can find endpoint URLs 
+                        Click to select (or paste your own). You can also find endpoint URLs 
                         <a href="https://alexschreyer.net/projects/openai-explorer-experimental/ai-explorer-manual/#using-different-ai-services" target="_blank">on this page</a>.
                     </div>                  
                 </div>      
@@ -357,7 +358,7 @@
                         theme: theme,
                         lineNumbers: true,
                         lineWrapping: true,
-                        readOnly: true,   // false = allow editing of the code
+                        readOnly: false,   // false = allow editing of the code
                     });
 
                     /* 

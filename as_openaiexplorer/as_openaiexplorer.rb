@@ -311,7 +311,7 @@ module AS_Extensions
                 prompt = ui_prompt.to_s
                 sys_prompt = settings["systemMessage"].to_s
                 sys_prompt += " Do not generate any Ruby code that operates on the local computer's file system." if ( settings["executeCode"] == true )
-                sys_prompt += " Format your response with HTML tags for the BODY section of a page (but exclude the BODY tag). Enclose any Ruby code in <pre> tags."
+                sys_prompt += " Format your response as a properly formatted HTML snippet (for the BODY section of a page but exclude the BODY tag). Enclose any Ruby code in <pre> tags and use common text tags such as <h2>, <p>, <strong>, <em>, <li>, etc."
 
                 # Add raw data to console output
                 puts_if_enabled "\n#{@exttitle} - RAW OUTPUT:\n"
@@ -564,7 +564,7 @@ module AS_Extensions
                 generated_response.gsub!( /\<\/pre\>\n/ ) { "</pre>" }
                 
                 if ruby_result != ''
-                    generated_response += "\n<h2>Result (from Ruby):</h2><br><pre>#{ruby_result.to_s}</pre>"
+                    generated_response += "\n<h2>Result (from Ruby):</h2><pre>#{ruby_result.to_s}</pre>"
                 end
                 
                 js = "add_response(#{generated_response.dump},#{info.dump})"
