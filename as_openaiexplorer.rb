@@ -104,6 +104,13 @@ History:        1.0 (3/18/2023):
                 - Prevented multiple dialog instances
                 - Adjusted default settings
                 - Cleaned up menu items
+                3.3 (TBD)
+                - API endpoint can now be http or https (e.g. for local models via LM Studio)
+                - Tweaked all system messages
+                - Set timeout to 60 for longer (thinking) execution
+                - Selection dropdown for API endpoints
+                - Set default model to gpt-5.4-mini
+
 
                 
                 

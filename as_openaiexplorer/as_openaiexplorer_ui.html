@@ -158,7 +158,7 @@
                     </div>                    
                 </div>      
                 <div class="mb-3">
-                  <label for="api-key" class="form-label">API Key</label>
+                  <label for="api-key" class="form-label">AI API Key</label>
                   <input type="password" class="form-control" id="api-key" placeholder="Paste your API key here" autocomplete="off">
                     <div id="api-key-help" class="form-text m-1">
                         You can get your API key here: 
@@ -169,11 +169,20 @@
                     </div>   
                 </div>    
                 <div class="mb-3">
-                  <label for="ai-endpoint" class="form-label">AI Endpoint URL</label>
-                  <input type="text" class="form-control" id="ai-endpoint" placeholder="https://api.example.com/chat/completions" value="https://api.openai.com/v1/chat/completions">
+                  <label for="ai-endpoint" class="form-label">AI API Endpoint URL</label>
+                  <div class="position-relative">
+                    <input type="text" class="form-control" id="ai-endpoint" placeholder="https://api.example.com/chat/completions" value="https://api.openai.com/v1/chat/completions" autocomplete="off">
+                    <div id="endpointDropdown" class="position-absolute w-100 border rounded bg-primary-subtle" style="top: 100%; left: 0; display: none; z-index: 1000; max-height: 200px; overflow-y: auto; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+                      <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.openai.com/v1/chat/completions</div>
+                      <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://generativelanguage.googleapis.com/v1beta/openai/chat/completions</div>                      
+                      <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.anthropic.com/v1/chat/completions</div>
+                      <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.perplexity.ai/chat/completions</div>
+                      <div class="dropdown-item" style="font-size: 0.8em; padding: 0.5rem 1rem; cursor: pointer;">https://api.deepseek.com/chat/completions</div>
+                    </div>
+                  </div>
                     <div id="api-endpoint-help" class="form-text m-1">
                         You can find endpoint URLs 
-                        <a href="https://alexschreyer.net/projects/openai-explorer-experimental/" target="_blank">on this page</a>.
+                        <a href="https://alexschreyer.net/projects/openai-explorer-experimental/ai-explorer-manual/#using-different-ai-services" target="_blank">on this page</a>.
                     </div>                  
                 </div>      
                 <h3>Extension:</h3>
@@ -291,6 +300,33 @@
                     if ($(this).val().length > 20) {
                         $(this).removeClass('is-invalid');
                         $(this).siblings('.invalid-feedback').remove();
+                    }
+                });
+                // Custom dropdown for ai-endpoint
+                const endpointInput = $('#ai-endpoint');
+                const endpointDropdown = $('#endpointDropdown');
+                const dropdownItems = endpointDropdown.find('.dropdown-item');
+                
+                endpointInput.on('focus click', function() {
+                    endpointDropdown.show();
+                });
+                
+                dropdownItems.on('click', function() {
+                    endpointInput.val($(this).text());
+                    endpointDropdown.hide();
+                });
+                
+                dropdownItems.on('mouseenter', function() {
+                    $(this).css('background-color', '#e9ecef');
+                });
+                
+                dropdownItems.on('mouseleave', function() {
+                    $(this).css('background-color', 'transparent');
+                });
+                
+                $(document).on('click', function(e) {
+                    if (!endpointInput.is(e.target) && !endpointDropdown.is(e.target) && endpointDropdown.has(e.target).length === 0) {
+                        endpointDropdown.hide();
                     }
                 });
             });            

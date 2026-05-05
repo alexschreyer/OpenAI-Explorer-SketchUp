@@ -21,7 +21,7 @@ module AS_Extensions
     # Set up some module-wide defaults as a hash
     @default_settings_hash = {
       "systemMessage" => "Respond within the context of SketchUp.",  # System Message
-      "aiModel" => "gpt-4.1-mini",  # Chat Completion Model
+      "aiModel" => "gpt-5.4-mini",  # Chat Completion Model
       "maxTokens" => "1024",  # Max. Tokens
       "temperature" => "1.0",  # Temperature
       "apiKey" => "",  # OpenAI/Google/... API key
@@ -300,10 +300,11 @@ module AS_Extensions
                 info = ""
 
                 # Set the endpoint and API key for the OpenAI/Google/... API
-                unless settings["aiEndpoint"].to_s.include?('https://')
-                  raise "AI API endpoint does not look like a valid URL. Please correct before trying again."
+                endpoint_str = settings["aiEndpoint"].to_s
+                unless endpoint_str.start_with?('http://') || endpoint_str.start_with?('https://')
+                  raise "AI API endpoint does not look like a valid URL. Please use http:// or https://"
                 end
-                endpoint = settings["aiEndpoint"].to_s
+                endpoint = endpoint_str
                 api_key = settings["apiKey"].to_s
 
                 # Define the prompt for the code completion
@@ -411,7 +412,8 @@ module AS_Extensions
                 req.body = JSON.dump(body_hash)
 
                 # Make the HTTP request to the OpenAI/Google/... API and parse the response
-                res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true, read_timeout: 30) do |http|
+                use_ssl = (uri.scheme == 'https')
+                res = Net::HTTP.start(uri.hostname, uri.port, use_ssl: use_ssl, read_timeout: 60) do |http|
                   http.request(req)
                 end
                 response_body = JSON.parse(res.body)
