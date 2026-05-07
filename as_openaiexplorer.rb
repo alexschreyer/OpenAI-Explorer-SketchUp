@@ -1,6 +1,6 @@
 =begin
 
-Copyright 2023-2025, Alexander C. Schreyer
+Copyright 2023-2026, Alexander C. Schreyer
 All rights reserved
 
 THIS SOFTWARE IS PROVIDED 'AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHOR OR ANY COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT OF OR IN CONNECTION WITH THIS SOFTWARE OR THE USE OR OTHER DEALINGS IN THIS SOFTWARE.
@@ -15,9 +15,9 @@ Website:        https://alexschreyer.net/projects/openai-explorer-experimental/
 
 Name :          AI Explorer (Experimental)
 
-Version:        3.2
+Version:        3.3
 
-Date :          12/15/2025
+Date :          5/7/2026
 
 Description :   An experimental extension to use OpenAI’s (or Google's / Anthropic's) services to create or manipulate geometry in SketchUp using natural language.
 
@@ -104,7 +104,7 @@ History:        1.0 (3/18/2023):
                 - Prevented multiple dialog instances
                 - Adjusted default settings
                 - Cleaned up menu items
-                3.3 (TBD)
+                3.3 (5/7/2026)
                 - API endpoint can now be http or https (e.g. for local models via LM Studio)
                 - Tweaked all system messages
                 - Set timeout to 60 seconds for longer (thinking) execution
@@ -134,7 +134,7 @@ module AS_Extensions
 
   module AS_OpenAIExplorer
   
-    @extversion           = "3.2"
+    @extversion           = "3.3"
     @exttitle             = "AI Explorer (Experimental)"
     @extname              = "as_openaiexplorer"
     

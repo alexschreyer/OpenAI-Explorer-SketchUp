@@ -22,7 +22,7 @@ module AS_Extensions
     @default_settings_hash = {
       "systemMessage" => "Respond within the context of SketchUp.",  # System Message
       "aiModel" => "gpt-5.4-mini",  # Chat Completion Model
-      "maxTokens" => "1024",  # Max. Tokens
+      "maxTokens" => "2048",  # Max. Tokens
       "temperature" => "1.0",  # Temperature
       "apiKey" => "",  # OpenAI/Google/... API key
       "executeCode" => false,  # Execute code
