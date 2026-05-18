@@ -1,6 +1,6 @@
 # OpenAI Explorer Extension for SketchUp
 
-Copyright 2023-2024, Alexander C. Schreyer
+Copyright 2023-2026, Alexander C. Schreyer
 All rights reserved
 
 Terms and Conditions: https://alexschreyer.net/projects/openai-explorer-experimental/#extension-terms-and-conditions
